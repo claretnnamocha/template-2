@@ -5,8 +5,8 @@ import formdata from "express-form-data";
 import swaggerUi from "swagger-ui-express";
 import { db, env, swagger } from "./configs";
 import { response } from "./helpers";
-import { CustomRequest } from "./types/controllers";
 import routes from "./routes";
+import { CustomRequest } from "./types/controllers";
 
 config();
 const app = express();

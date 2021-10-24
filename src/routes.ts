@@ -1,7 +1,7 @@
 import { Response, Router } from "express";
-import { response } from "../helpers";
-import auth from "./auth";
-import user from "./user";
+import { response } from "./helpers";
+import auth from "./modules/auth/routes";
+import user from "./modules/user/routes";
 
 const routes = Router();
 

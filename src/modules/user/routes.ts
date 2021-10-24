@@ -1,8 +1,7 @@
 import { Router } from "express";
-import { user } from "../controllers";
-import { validate } from "../middlewares";
-import { user as validator } from "../validators";
-import { authenticate } from "../middlewares";
+import { authenticate, validate } from "../../middlewares";
+import * as user from "./controller";
+import * as validator from "./validators";
 
 const routes = Router();
 routes.use(authenticate);
