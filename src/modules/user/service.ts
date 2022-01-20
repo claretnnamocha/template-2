@@ -111,21 +111,6 @@ const editProfile = async (
 
       update["username"] = username;
     }
-
-    // if (email !== undefined && user.email !== email) {
-    //   const duplicate = await User.findOne({
-    //     where: { email, isDeleted: false, id: { [Op.ne]: user.id } },
-    //   });
-
-    //   if (duplicate)
-    //     return {
-    //       status: false,
-    //       message: "This email has been taken on this platform",
-    //     };
-    //   update["email"] = email;
-    //   update["verifiedemail"] = false;
-    // }
-
     await user.update(update);
 
     return { status: true, message: "Profile edit Successful" };
