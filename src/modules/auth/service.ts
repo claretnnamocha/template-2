@@ -283,7 +283,7 @@ export const resetPassword = async (
   }
 };
 
-export const generateToken = async ({
+const generateToken = async ({
   userId,
   tokenType = "verify",
   medium = "any",
