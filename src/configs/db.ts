@@ -1,10 +1,11 @@
 import { Sequelize, SequelizeScopeError } from "sequelize";
 import { v4 as uuid } from "uuid";
-import { dbURL, dialect } from "./env";
+import { dbSecure, dbURL } from "./env";
 
 export const db = new Sequelize(dbURL, {
-  dialect,
-  dialectOptions: { ssl: { require: true, rejectUnauthorized: false } },
+  dialectOptions: !dbSecure
+    ? {}
+    : { ssl: { require: true, rejectUnauthorized: false } },
   logging: false,
 });
 
@@ -13,11 +14,11 @@ const seed = async (models: any) => {
 
   await models.User.create({
     id: uuid(),
-    username: "alpha",
+    username: "admin",
     email: "devclareo@gmail.com",
     firstname: "Claret",
     lastname: "Nnamocha",
-    password: "Alpha123",
+    password: "Password123!",
     roles: "super-admin",
     verifiedemail: true,
   });
@@ -27,7 +28,7 @@ const seed = async (models: any) => {
   console.log("Seeded");
 };
 
-export const authenticate = (db: Sequelize, clear: boolean = false) => {
+export const authenticate = ({ clear = false }) => {
   db.authenticate()
     .then(async () => {
       console.log("Connection to Database has been established successfully.");

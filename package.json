@@ -10,7 +10,11 @@
     "postinstall": "cd 'src/helpers' && yarn"
   },
   "keywords": [],
-  "author": "Claret Nnamocha <devclareo@gmail.com>",
+  "author": {
+    "name": "Claret Nnamocha",
+    "email": "devclareo@gmail.com",
+    "url": "https://claretnnamocha.com"
+  },
   "license": "ISC",
   "dependencies": {
     "@bull-board/api": "^3.6.0",

@@ -1,4 +1,6 @@
-export interface UserInterface {
+import { Model } from "sequelize/types";
+
+interface UserInterface {
   id?: string;
   firstname?: string;
   lastname?: string;
@@ -7,13 +9,17 @@ export interface UserInterface {
   phone?: string;
   password?: string;
   gender?: string;
-  dob?: string;
+  location?: string;
+  dob?: Date;
   deleted?: boolean;
   verifiedemail?: boolean;
   verifiedphone?: boolean;
-  role?: string;
   active?: boolean;
   createdAt?: Date;
+  loginValidFrom?: string;
   transform?: Function;
+  validatePassword?: Function;
   updatedAt?: Date;
 }
+
+export interface UserSchema extends Model<UserInterface>, UserInterface {}

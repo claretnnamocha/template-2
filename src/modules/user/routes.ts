@@ -1,23 +1,22 @@
 import { Router } from "express";
-import { authenticate, controller, validate } from "../../middlewares";
-import * as user from "./controller";
+import { controller, validate } from "../../middlewares";
+import * as user from "./service";
 import * as validator from "./validators";
 
 const routes = Router();
-routes.use(authenticate);
 
 routes.get("", controller(user.getProfile));
 
 routes.put(
   "/change-password",
   validate(validator.changePassword),
-  controller(user.changePassword)
+  controller(user.updatePassword)
 );
 
 routes.put(
   "/edit-profile",
   validate(validator.editProfile),
-  controller(user.editProfile)
+  controller(user.updateProfile)
 );
 
 export default routes;

@@ -1,6 +1,9 @@
+import fs from "fs";
 import swaggerJsDoc, { Options } from "swagger-jsdoc";
-import { description, version, displayName } from "../../package.json";
+import { displayName, version, author } from "../../package.json";
 import { env, port } from "./env";
+
+const description = () => fs.readFileSync("src/docs/description.md").toString();
 
 let apis = ["./src/docs/*.yml"];
 if (env === "development") apis.push("./src/docs/*.yaml");
@@ -9,9 +12,10 @@ const swagger: Options = {
   swaggerDefinition: {
     info: {
       version,
-      description,
+      description: description(),
       title: `${displayName} (${env})`,
-      contact: { name: "Claret Nnamocha", email: "devclareo@gmail.com" },
+      // @ts-ignore:next-line
+      contact: { name: author?.name, email: author?.email },
       servers: [{ url: `http://localhost:${port}` }],
     },
   },

@@ -2,13 +2,14 @@ import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import formdata from "express-form-data";
 import swaggerUi from "swagger-ui-express";
+import { displayName } from "../package.json";
 import { bullBoard, db, env, security, swagger } from "./configs";
 import { response } from "./helpers";
 import routes from "./routes";
 
 const app = express();
 const port: number = env.port;
-db.authenticate(db.db);
+db.authenticate({});
 
 app.use(formdata.parse());
 app.use(express.json({ limit: "100mb", type: "application/json" }));
@@ -21,7 +22,6 @@ app.use("/bull-board", bullBoard.adapter.getRouter());
 security.lock(app);
 
 app.use("", routes);
-
 app.use((err: Error, _: Request, res: Response, next: NextFunction) => {
   return response(
     res,
@@ -32,7 +32,9 @@ app.use((err: Error, _: Request, res: Response, next: NextFunction) => {
 
 if (require.main) {
   app.listen(port, () => {
-    console.log(`Backend is running on http://localhost:${port} (${env.env})`);
+    console.log(
+      `${displayName} is running on http://localhost:${port} (${env.env})`
+    );
   });
 }
 

@@ -1,7 +1,4 @@
 export interface auth {
   isAdmin?: boolean;
+  role?: string;
 }
-
-// export interface val {
-//   fields: object;
-// }
