@@ -17,12 +17,14 @@ export const sendEmail = async ({ to, text, subject, html }) => {
   await jobs.process({
     queueName,
     queue: EmailQueue,
-    callback: () =>
-      mail.pepipost.send({
+    callback: async () => {
+      const sent = await mail.pepipost.send({
         to,
         text,
         subject,
         html,
-      }),
+      });
+      if (!sent) throw new Error("Email not sent");
+    },
   });
 };
