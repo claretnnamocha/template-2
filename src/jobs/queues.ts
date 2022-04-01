@@ -1,3 +1,3 @@
-import { create } from "./create";
+import { jobs } from "../helpers";
 
-export const EmailQueue = create({ queueName: "email" });
+export const EmailQueue = jobs.create({ queueName: "email" });
