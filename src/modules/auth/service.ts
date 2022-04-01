@@ -3,7 +3,8 @@ import randomstring from "randomstring";
 import { Op } from "sequelize";
 import { v4 as uuid } from "uuid";
 import { devEnv } from "../../configs/env";
-import { jwt, mail } from "../../helpers";
+import { jwt } from "../../helpers";
+import { sendEmail } from "../../jobs";
 import { Token, User } from "../../models";
 import { TokenSchema, UserSchema } from "../../types/models";
 import { auth, others } from "../../types/services";
@@ -49,7 +50,7 @@ export const signUp = async (
     });
 
     const { text, html } = msg.registration({ token, username: email, email });
-    mail.pepipost.send({
+    sendEmail({
       to: email,
       subject: "Registration Complete",
       text,
@@ -115,7 +116,7 @@ export const signIn = async (
         username: _user.email,
         email: _user.email,
       });
-      mail.pepipost.send({
+      sendEmail({
         to: _user.email,
         subject: "Verify your email",
         text,
@@ -184,7 +185,7 @@ export const verifyAccount = async (
         username: user.email,
         email: user.email,
       });
-      mail.pepipost.send({
+      sendEmail({
         to: user.email,
         subject: "Verify your email",
         text,
@@ -274,7 +275,7 @@ export const initiateReset = async (
       token,
       username: user.email,
     });
-    mail.pepipost.send({
+    sendEmail({
       to: user.email,
       subject: "Reset Password",
       text,
@@ -384,7 +385,7 @@ export const resendVerificationAccount = async (
     }
 
     const token = await generateToken({ userId: user.id });
-    await mail.sendgrid.send({
+    sendEmail({
       to: user.email,
       subject: "Verify Email",
       text: `Verify email: ${token}`,
