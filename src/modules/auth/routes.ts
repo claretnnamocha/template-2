@@ -15,12 +15,6 @@ routes.get(
   controller(auth.verifyAccount)
 );
 
-routes.get(
-  "/resend-verification",
-  validate(validator.resendVerification),
-  controller(auth.resendVerificationAccount)
-);
-
 routes.post(
   "/initiate-reset",
   validate(validator.initiateReset),

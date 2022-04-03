@@ -22,6 +22,7 @@ export interface VerifyRequest {
   token: string;
   userId?: string;
   email?: string;
+  resend?: boolean;
 }
 
 export interface InitiateResetRequest {

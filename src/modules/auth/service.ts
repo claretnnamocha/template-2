@@ -5,8 +5,8 @@ import { v4 as uuid } from "uuid";
 import { devEnv } from "../../configs/env";
 import { jwt } from "../../helpers";
 import { sendEmail } from "../../jobs";
-import { Token, User } from "../../models";
-import { TokenSchema, UserSchema } from "../../types/models";
+import { User } from "../../models";
+import { UserSchema } from "../../types/models";
 import { auth, others } from "../../types/services";
 import * as msg from "../message-templates";
 
@@ -21,7 +21,7 @@ export const signUp = async (
   try {
     const { email } = params;
 
-    for (const param of ["email", "phone", "username"]) {
+    for (const param of ["email", "phone"]) {
       if (params[param]) {
         const where: any = { [param]: params[param] };
         const duplicate: UserSchema = await User.findOne({ where });
@@ -50,6 +50,7 @@ export const signUp = async (
     });
 
     const { text, html } = msg.registration({ token, username: email, email });
+
     sendEmail({
       to: email,
       subject: "Registration Complete",
@@ -87,7 +88,7 @@ export const signIn = async (
 
     const _user: UserSchema = await User.findOne({
       where: {
-        [Op.or]: [{ username: user }, { email: user }, { phone: user }],
+        [Op.or]: [{ email: user }, { phone: user }],
       },
     });
 
@@ -116,6 +117,7 @@ export const signIn = async (
         username: _user.email,
         email: _user.email,
       });
+
       sendEmail({
         to: _user.email,
         subject: "Verify your email",
@@ -156,19 +158,20 @@ export const verifyAccount = async (
   params: auth.VerifyRequest
 ): Promise<others.Response> => {
   try {
-    const { token, email } = params;
+    const { token, email, resend } = params;
 
-    if (email) {
-      const user: UserSchema = await User.findOne({
-        where: { email },
-      });
+    const user: UserSchema = await User.findOne({
+      where: { email },
+    });
 
-      if (!user)
-        return {
-          payload: { status: false, message: "Profile does not exist" },
-          code: 404,
-        };
+    if (!user) {
+      return {
+        payload: { status: false, message: "User not found" },
+        code: 404,
+      };
+    }
 
+    if (resend) {
       if (user.verifiedemail)
         return {
           payload: { status: false, message: "Profile is already verified" },
@@ -185,6 +188,7 @@ export const verifyAccount = async (
         username: user.email,
         email: user.email,
       });
+
       sendEmail({
         to: user.email,
         subject: "Verify your email",
@@ -195,36 +199,23 @@ export const verifyAccount = async (
       return { status: true, message: "Check your email" };
     }
 
-    const _token: TokenSchema = await Token.findOne({
-      where: { token, tokenType: "verify", active: true },
-    });
-
-    if (!_token) {
+    if (!user.verifyToken || user.verifyToken != token) {
       return {
         payload: { status: false, message: "Invalid token" },
         code: 498,
       };
     }
 
-    await _token.update({ active: false });
+    await user.update({ verifyToken: "" });
 
-    if (parseInt(_token.expires) < Date.now()) {
+    if (parseInt(user.tokenExpires) < Date.now()) {
       return {
         payload: { status: false, message: "Token expired" },
         code: 410,
       };
     }
 
-    const user: UserSchema = await User.findByPk(_token.UserId);
-
-    if (!user) {
-      return {
-        payload: { status: false, message: "User not found" },
-        code: 404,
-      };
-    }
-
-    await user.update({ verifiedemail: true });
+    await user.update({ verifiedemail: true, tokenExpires: "0" });
 
     return {
       payload: { status: true, message: "Account verified" },
@@ -275,6 +266,7 @@ export const initiateReset = async (
       token,
       username: user.email,
     });
+
     sendEmail({
       to: user.email,
       subject: "Reset Password",
@@ -311,34 +303,27 @@ export const verifyReset = async (
   try {
     const { token } = params;
 
-    const _token: TokenSchema = await Token.findOne({
-      where: { token, tokenType: "reset", active: true },
+    const user: UserSchema = await User.findOne({
+      where: { resetToken: token, isDeleted: false, active: true },
     });
 
-    if (!_token) {
+    if (!user) {
       return {
         payload: { status: false, message: "Invalid token" },
         code: 498,
       };
     }
 
-    await _token.update({ active: false });
+    await user.update({ resetToken: "" });
 
-    if (parseInt(_token.expires) < Date.now()) {
+    if (parseInt(user.tokenExpires) < Date.now()) {
       return {
         payload: { status: false, message: "Token expired" },
         code: 410,
       };
     }
 
-    const user: UserSchema = await User.findByPk(_token.UserId);
-
-    if (!user) {
-      return {
-        payload: { status: false, message: "Profile does not exist" },
-        code: 404,
-      };
-    }
+    await user.update({ tokenExpires: "0" });
 
     const data: string = await generateToken({
       userId: user.id,
@@ -362,50 +347,6 @@ export const verifyReset = async (
 };
 
 /**
- * Resend Verification code for user account
- * @param {auth.ResendVerifyRequest} params  Request Body
- * @returns {others.Response} Contains status, message and data if any of the operation
- */
-export const resendVerificationAccount = async (
-  params: auth.ResendVerifyRequest
-): Promise<others.Response> => {
-  try {
-    const { email } = params;
-
-    const user: UserSchema = await User.findOne({
-      where: { email, active: true },
-    });
-
-    if (!user) {
-      return { status: false, message: "Invalid user" };
-    }
-
-    if (user.verifiedemail) {
-      return { status: false, message: "You are already verified" };
-    }
-
-    const token = await generateToken({ userId: user.id });
-    sendEmail({
-      to: user.email,
-      subject: "Verify Email",
-      text: `Verify email: ${token}`,
-      html: `Verify email: ${token}`,
-    });
-    return { status: true, message: "Verification token resent" };
-  } catch (error) {
-    return {
-      payload: {
-        status: false,
-        message: "Error trying to resend verification".concat(
-          devEnv ? ": " + error : ""
-        ),
-      },
-      code: 500,
-    };
-  }
-};
-
-/**
  * Reset user password
  * @param {auth.ResetPasswordRequest} params  Request Body
  * @returns {others.Response} Contains status, message and data if any of the operation
@@ -416,36 +357,27 @@ export const resetPassword = async (
   try {
     const { token, password, logOtherDevicesOut } = params;
 
-    const _token: TokenSchema = await Token.findOne({
-      where: { token, tokenType: "update", active: true },
+    const user: UserSchema = await User.findOne({
+      where: { updateToken: token, isDeleted: false, active: true },
     });
 
-    if (!_token) {
+    if (!user) {
       return {
         payload: { status: false, message: "Invalid token" },
         code: 498,
       };
     }
 
-    await _token.update({ active: false });
+    await user.update({ updateToken: "" });
 
-    if (parseInt(_token.expires) < Date.now()) {
+    if (parseInt(user.tokenExpires) < Date.now()) {
       return {
         payload: { status: false, message: "Token expired" },
         code: 410,
       };
     }
 
-    const user: UserSchema = await User.findByPk(_token.UserId);
-
-    if (!user) {
-      return {
-        payload: { status: false, message: "Profile does not exist" },
-        code: 404,
-      };
-    }
-
-    let update: any = { password };
+    let update: any = { password, tokenExpires: "0" };
     if (logOtherDevicesOut) update.loginValidFrom = Date.now();
 
     await user.update(update);
@@ -470,29 +402,31 @@ export const resetPassword = async (
 export const generateToken = async ({
   userId,
   tokenType = "verify",
-  medium = "any",
   expiresMins = 5,
   charset = "alphanumeric",
   length = 5,
 }) => {
-  await Token.update(
-    { active: false },
-    { where: { UserId: userId, tokenType, active: true } }
-  );
+  const user = await User.findByPk(userId);
 
-  const token = randomstring.generate({
-    charset,
-    length,
-    capitalization: "uppercase",
-  });
+  let token: string;
+  let exists: UserSchema;
+  do {
+    token = randomstring.generate({
+      charset,
+      length,
+      capitalization: "uppercase",
+    });
 
-  await Token.create({
-    id: uuid(),
-    tokenType,
-    token,
-    UserId: userId,
-    medium,
-    expires: Date.now() + 60 * 1000 * expiresMins,
+    exists = await User.findOne({
+      where: {
+        [`${tokenType}Token`]: token,
+      },
+    });
+  } while (exists);
+
+  await user.update({
+    [`${tokenType}Token`]: token,
+    tokenExpires: Date.now() + 60 * 1000 * expiresMins,
   });
 
   return token;

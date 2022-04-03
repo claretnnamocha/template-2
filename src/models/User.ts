@@ -6,7 +6,6 @@ const User = db.define(
   "User",
   {
     id: { type: DataTypes.UUID, primaryKey: true },
-    username: { type: DataTypes.STRING },
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
     firstname: { type: DataTypes.STRING },
     lastname: { type: DataTypes.STRING },
@@ -32,8 +31,6 @@ const User = db.define(
         this.setDataValue("password", bcrypt.hashSync(value, salt));
       },
     },
-    gender: { type: DataTypes.STRING },
-    dob: { type: DataTypes.DATE },
     isDeleted: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
@@ -59,6 +56,22 @@ const User = db.define(
       defaultValue: Date.now(),
       allowNull: false,
     },
+    verifyToken: {
+      type: DataTypes.STRING,
+      defaultValue: null,
+    },
+    resetToken: {
+      type: DataTypes.STRING,
+      defaultValue: null,
+    },
+    updateToken: {
+      type: DataTypes.STRING,
+      defaultValue: null,
+    },
+    tokenExpires: {
+      type: DataTypes.STRING,
+      defaultValue: "0",
+    },
   },
   { timestamps: true, tableName: "user" }
 );
@@ -67,6 +80,16 @@ User.prototype.toJSON = function () {
   const data = this.dataValues;
 
   delete data.password;
+  delete data.verifyToken;
+  delete data.resetToken;
+  delete data.updateToken;
+  delete data.tokenExpires;
+  delete data.loginValidFrom;
+  delete data.role;
+  delete data.permissions;
+  delete data.active;
+  delete data.isDeleted;
+  delete data.id;
   return data;
 };
 

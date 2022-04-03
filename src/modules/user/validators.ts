@@ -1,33 +1,34 @@
 import Joi from "joi";
 import passwordComplexity from "joi-password-complexity";
 
-export const changePassword = {
-  oldPassword: Joi.string().required(),
-  password: passwordComplexity(),
+export const updateProfile = {
+  firstname: Joi.string(),
+  lastname: Joi.string(),
+  location: Joi.string(),
+  avatar: Joi.string().uri(),
 };
 
-export const editProfile = {
-  username: Joi.string(),
-  // email: Joi.string().email(),
-  firstname: Joi.string(),
+export const updatePassword = {
+  password: Joi.string(),
+  newPassword: passwordComplexity(),
+  logOtherDevicesOut: Joi.boolean().default(false),
+};
+
+export const verifyPhone = {
+  token: Joi.string(),
+};
+
+export const getAllUsers = {
+  name: Joi.string(),
+  email: Joi.string().email(),
+  verifiedemail: Joi.boolean(),
+  verifiedphone: Joi.boolean(),
+  active: Joi.boolean(),
+  isDeleted: Joi.boolean(),
   dob: Joi.date(),
-  country: Joi.string(),
-  preferredLanguage: Joi.string(),
-  currency: Joi.string(),
-  lastname: Joi.string(),
-  othernames: Joi.string(),
-  avatar: Joi.string().uri(),
-  addresses: Joi.array().items(
-    Joi.object()
-      .keys({
-        country: Joi.string().required(),
-        city: Joi.string().required(),
-        state: Joi.string().required(),
-        zip: Joi.string().required(),
-        no: Joi.string().required(),
-        street: Joi.string().required(),
-        landmark: Joi.string().required(),
-      })
-      .unknown(false)
-  ),
+  phone: Joi.string(),
+  permissions: Joi.array().items(Joi.string().required()).unique(),
+  role: Joi.string().valid("admin", "user"),
+  page: Joi.number().default(1),
+  pageSize: Joi.number().default(10),
 };

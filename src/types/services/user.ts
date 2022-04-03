@@ -17,7 +17,6 @@ export interface UpdatePasswordRequest {
 export interface GetAll {
   name?: string;
   email?: string;
-  username?: string;
   verifiedemail?: boolean;
   isDeleted?: boolean;
   verifiedphone?: boolean;

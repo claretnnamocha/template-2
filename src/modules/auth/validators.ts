@@ -8,21 +8,17 @@ export const signIn = {
 };
 
 export const signUp = {
-  role: Joi.string().required().valid("user"),
+  firstname: Joi.string(),
+  lastname: Joi.string(),
+  phone: JoiPhone.string().phoneNumber({ format: "e164" }),
   email: Joi.string().email().required(),
-  firstname: Joi.string().required(),
-  lastname: Joi.string().required(),
-  phone: JoiPhone.string().phoneNumber({ format: "e164" }).required(),
-  othernames: Joi.string(),
   password: passwordComplexity(),
 };
 
 export const verify = {
   token: Joi.string(),
-};
-
-export const resendVerification = {
-  email: Joi.string().email().required(),
+  email: Joi.string().required(),
+  resend: Joi.boolean(),
 };
 
 export const initiateReset = {

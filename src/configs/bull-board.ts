@@ -6,7 +6,7 @@ import * as queues from "../jobs/queues";
 const serverAdapter = new ExpressAdapter();
 
 createBullBoard({
-  queues: Object.values(queues).map((q) => new BullAdapter(q)),
+  queues: Object.values(queues).map((q: any) => new BullAdapter(q)),
   serverAdapter,
 });
 

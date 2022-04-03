@@ -41,22 +41,13 @@ paths:
         - in: query
           name: token
           type: string
-          required: true
-      responses:
-        200:
-          description: Status and message and data
-
-  /auth/resend-verification:
-    get:
-      tags:
-        - Authentication
-      produces:
-        - application/json
-      parameters:
         - in: query
           name: email
           type: string
           required: true
+        - in: query
+          name: resend
+          type: boolean
       responses:
         200:
           description: Status and message and data
@@ -115,31 +106,21 @@ definitions:
       user:
         type: string
         required: true
+        default: admin@kointoss.com
       password:
         type: string
         required: true
+        default: Password123!
   signUp:
     type: object
     properties:
       firstname:
         type: string
-        required: true
       lastname:
         type: string
-        required: true
-      username:
+      phone:
         type: string
-        required: true
       email:
-        type: string
-        required: true
-      role:
-        type: string
-        required: true
-      country:
-        type: string
-        required: true
-      preferredLanguage:
         type: string
         required: true
       password:

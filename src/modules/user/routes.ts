@@ -5,18 +5,34 @@ import * as validator from "./validators";
 
 const routes = Router();
 
-routes.get("", controller(user.getProfile));
+routes.get("/", controller(user.getProfile));
+
+routes.get(
+  "/verify-phone",
+  validate(validator.verifyPhone),
+  controller(user.verifyPhone)
+);
 
 routes.put(
-  "/change-password",
-  validate(validator.changePassword),
+  "/update-password",
+  validate(validator.updatePassword),
   controller(user.updatePassword)
 );
 
 routes.put(
-  "/edit-profile",
-  validate(validator.editProfile),
+  "/update-profile",
+  validate(validator.updateProfile),
   controller(user.updateProfile)
 );
+
+routes.get(
+  "/all-users",
+  validate(validator.getAllUsers),
+  controller(user.getAllUsers)
+);
+
+routes.post("/log-other-devices-out", controller(user.logOtherDevicesOut));
+
+routes.post("/sign-out", controller(user.signOut));
 
 export default routes;

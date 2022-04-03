@@ -14,7 +14,6 @@ const seed = async (models: any) => {
 
   await models.User.create({
     id: uuid(),
-    username: "admin",
     email: "devclareo@gmail.com",
     firstname: "Claret",
     lastname: "Nnamocha",

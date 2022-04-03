@@ -2,5 +2,5 @@
 
 ### Test login
 
-Email: admin
+Email: devclareo@gmail.com
 Password: Password123!

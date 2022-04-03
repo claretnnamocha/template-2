@@ -1,8 +1,8 @@
 import { Op } from "sequelize";
 import { devEnv } from "../../configs/env";
 import { jwt, sms } from "../../helpers";
-import { Token, User } from "../../models";
-import { TokenSchema, UserSchema } from "../../types/models";
+import { User } from "../../models";
+import { UserSchema } from "../../types/models";
 import { auth, others, user } from "../../types/services";
 import { generateToken } from "../auth/service";
 import * as msg from "../message-templates";
@@ -51,20 +51,13 @@ export const verifyPhone = async (
   try {
     const { token, userId } = params;
 
-    const user: UserSchema = await User.findByPk(userId);
-
-    if (!user)
-      return {
-        payload: { status: false, message: "Profile does not exist" },
-        code: 404,
-      };
+    let user: UserSchema = await User.findByPk(userId);
 
     if (!token) {
       const token: string = await generateToken({
-        userId: user.id,
+        userId,
         length: 6,
         charset: "numeric",
-        medium: "phone",
       });
 
       const status = await sms.africastalking.send({
@@ -81,32 +74,31 @@ export const verifyPhone = async (
       };
     }
 
-    const _token: TokenSchema = await Token.findOne({
+    user = await User.findOne({
       where: {
-        token,
-        tokenType: "verify",
+        verifyToken: token,
+        isDeleted: false,
         active: true,
-        medium: "phone",
-        UserId: user.id,
+        id: userId,
       },
     });
 
-    if (!_token)
+    if (!user)
       return {
         payload: { status: false, message: "Invalid token" },
         code: 498,
       };
 
-    await _token.update({ active: false });
+    await user.update({ verifyToken: "" });
 
-    if (parseInt(_token.expires) < Date.now()) {
+    if (parseInt(user.tokenExpires) < Date.now()) {
       return {
         payload: { status: false, message: "Token expired" },
         code: 410,
       };
     }
 
-    await user.update({ verifiedemail: true });
+    await user.update({ verifiedemail: true, tokenExpires: "0" });
 
     return {
       payload: { status: true, message: "Account verified" },
@@ -182,8 +174,18 @@ export const updatePassword = async (
     let update: any = { password: newPassword };
     if (logOtherDevicesOut) update.loginValidFrom = Date.now();
 
-    await user.update({ password: newPassword });
-    return { status: true, message: "Password updated" };
+    await user.update(update);
+
+    return {
+      status: true,
+      message: "Password updated",
+      data: logOtherDevicesOut
+        ? jwt.generate({
+            payload: user.id,
+            loginValidFrom: user.loginValidFrom,
+          })
+        : null,
+    };
   } catch (error) {
     return {
       payload: {
@@ -274,7 +276,6 @@ export const getAllUsers = async (
     const {
       name,
       email,
-      username,
       verifiedemail,
       verifiedphone,
       active,
@@ -292,8 +293,7 @@ export const getAllUsers = async (
 
     if (name) where = { ...where, name: { [Op.like]: `%${name}%` } };
     if (email) where = { ...where, email: { [Op.like]: `%${email}%` } };
-    if (username)
-      where = { ...where, username: { [Op.like]: `%${username}%` } };
+
     if (phone) where = { ...where, phone: { [Op.like]: `%${phone}%` } };
 
     if (gender) where = { ...where, gender };
