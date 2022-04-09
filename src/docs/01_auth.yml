@@ -106,7 +106,7 @@ definitions:
       user:
         type: string
         required: true
-        default: admin@kointoss.com
+        default: devclareo@gmail.com
       password:
         type: string
         required: true
