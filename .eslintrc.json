@@ -1,0 +1,19 @@
+{
+  "env": {
+    "es2021": true,
+    "node": true
+  },
+  "extends": ["airbnb-base"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  //   "plugins": ,["@typescript-eslint"],
+  "rules": {
+    "import/no-unresolved": "off",
+    "import/extensions": "off",
+    "quotes": ["error", "double"],
+    "import/no-relative-packages": "off",
+    "import/prefer-default-export": "off"
+  }
+}
