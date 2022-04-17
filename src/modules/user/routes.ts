@@ -10,25 +10,25 @@ routes.get("/", controller(user.getProfile));
 routes.get(
   "/verify-phone",
   validate(validator.verifyPhone),
-  controller(user.verifyPhone)
+  controller(user.verifyPhone),
 );
 
 routes.put(
   "/update-password",
   validate(validator.updatePassword),
-  controller(user.updatePassword)
+  controller(user.updatePassword),
 );
 
 routes.put(
   "/update-profile",
   validate(validator.updateProfile),
-  controller(user.updateProfile)
+  controller(user.updateProfile),
 );
 
 routes.get(
   "/all-users",
   validate(validator.getAllUsers),
-  controller(user.getAllUsers)
+  controller(user.getAllUsers),
 );
 
 routes.post("/log-other-devices-out", controller(user.logOtherDevicesOut));

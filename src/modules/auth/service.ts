@@ -10,6 +10,39 @@ import { UserSchema } from "../../types/models";
 import { auth, others } from "../../types/services";
 import * as msg from "../message-templates";
 
+export const generateToken = async ({
+  userId,
+  tokenType = "verify",
+  expiresMins = 5,
+  charset = "alphanumeric",
+  length = 5,
+}) => {
+  const user = await User.findByPk(userId);
+
+  let token: string;
+  let exists: UserSchema;
+  do {
+    token = randomstring.generate({
+      charset,
+      length,
+      capitalization: "uppercase",
+    });
+
+    exists = await User.findOne({
+      where: {
+        [`${tokenType}Token`]: token,
+      },
+    });
+  } while (exists);
+
+  await user.update({
+    [`${tokenType}Token`]: token,
+    tokenExpires: Date.now() + 60 * 1000 * expiresMins,
+  });
+
+  return token;
+};
+
 /**
  * Creates user account
  * @param {auth.SignUpRequest} params  Request Body
@@ -67,7 +100,7 @@ export const signUp = async (
       payload: {
         status: false,
         message: "Error trying to create account".concat(
-          devEnv ? ": " + error : ""
+          devEnv ? `: ${error}` : ""
         ),
       },
       code: 500,
@@ -133,8 +166,7 @@ export const signIn = async (
 
     const data: any = _user.toJSON();
     data.token = jwt.generate({
-      payload: _user.id,
-      loginValidFrom: _user.loginValidFrom,
+      payload: { payload: _user.id, loginValidFrom: _user.loginValidFrom },
     });
 
     return { status: true, message: "Login successful", data };
@@ -142,7 +174,7 @@ export const signIn = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to login".concat(devEnv ? ": " + error : ""),
+        message: "Error trying to login".concat(devEnv ? `: ${error}` : ""),
       },
       code: 500,
     };
@@ -172,11 +204,12 @@ export const verifyAccount = async (
     }
 
     if (resend) {
-      if (user.verifiedemail)
+      if (user.verifiedemail) {
         return {
           payload: { status: false, message: "Profile is already verified" },
           code: 400,
         };
+      }
 
       const token: string = await generateToken({
         userId: user.id,
@@ -226,7 +259,7 @@ export const verifyAccount = async (
       payload: {
         status: false,
         message: "Error trying to verify account".concat(
-          devEnv ? ": " + error : ""
+          devEnv ? `: ${error}` : ""
         ),
       },
       code: 500,
@@ -284,7 +317,7 @@ export const initiateReset = async (
       payload: {
         status: false,
         message: "Error trying to initiate reset".concat(
-          devEnv ? ": " + error : ""
+          devEnv ? `: ${error}` : ""
         ),
       },
       code: 500,
@@ -339,7 +372,7 @@ export const verifyReset = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to login".concat(devEnv ? ": " + error : ""),
+        message: "Error trying to login".concat(devEnv ? `: ${error}` : ""),
       },
       code: 500,
     };
@@ -377,7 +410,7 @@ export const resetPassword = async (
       };
     }
 
-    let update: any = { password, tokenExpires: "0" };
+    const update: any = { password, tokenExpires: "0" };
     if (logOtherDevicesOut) update.loginValidFrom = Date.now();
 
     await user.update(update);
@@ -391,43 +424,10 @@ export const resetPassword = async (
       payload: {
         status: false,
         message: "Error trying to reset password".concat(
-          devEnv ? ": " + error : ""
+          devEnv ? `: ${error}` : ""
         ),
       },
       code: 500,
     };
   }
-};
-
-export const generateToken = async ({
-  userId,
-  tokenType = "verify",
-  expiresMins = 5,
-  charset = "alphanumeric",
-  length = 5,
-}) => {
-  const user = await User.findByPk(userId);
-
-  let token: string;
-  let exists: UserSchema;
-  do {
-    token = randomstring.generate({
-      charset,
-      length,
-      capitalization: "uppercase",
-    });
-
-    exists = await User.findOne({
-      where: {
-        [`${tokenType}Token`]: token,
-      },
-    });
-  } while (exists);
-
-  await user.update({
-    [`${tokenType}Token`]: token,
-    tokenExpires: Date.now() + 60 * 1000 * expiresMins,
-  });
-
-  return token;
 };

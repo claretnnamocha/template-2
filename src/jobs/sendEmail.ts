@@ -1,7 +1,9 @@
 import { jobs, mail } from "../helpers";
 import { EmailQueue } from "./queues";
 
-export const sendEmail = async ({ to, text, subject, html }) => {
+export const sendEmail = async ({
+  to, text, subject, html,
+}) => {
   const queueName = "sendEmail";
 
   await jobs.add({

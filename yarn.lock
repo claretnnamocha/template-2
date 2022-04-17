@@ -34,7 +34,7 @@
     call-me-maybe "^1.0.1"
     z-schema "^4.2.3"
 
-"@bull-board/api@3.6.0", "@bull-board/api@^3.6.0":
+"@bull-board/api@3.6.0":
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/@bull-board/api/-/api-3.6.0.tgz#5f6e4e338502fa7971be08fb8a72f0d49f001a74"
   integrity sha512-x2Du+bJRl/Nz0hawub7Yo7Y2R3vR8K3kFzAyptbgmcT32CooR3u5tDIe8lUA0UO2NnZ4asoyFKamp+KVgS18KA==

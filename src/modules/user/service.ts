@@ -20,11 +20,12 @@ export const getProfile = async (
 
     const data: UserSchema = await User.findByPk(userId);
 
-    if (!data)
+    if (!data) {
       return {
         payload: { status: false, message: "Profile does not exist" },
         code: 404,
       };
+    }
 
     return { status: true, message: "Profile", data };
   } catch (error) {
@@ -32,7 +33,7 @@ export const getProfile = async (
       payload: {
         status: false,
         message: "Error trying to get profile".concat(
-          devEnv ? ": " + error : ""
+          devEnv ? `: ${error}` : ""
         ),
       },
       code: 500,
@@ -83,11 +84,12 @@ export const verifyPhone = async (
       },
     });
 
-    if (!user)
+    if (!user) {
       return {
         payload: { status: false, message: "Invalid token" },
         code: 498,
       };
+    }
 
     await user.update({ verifyToken: "" });
 
@@ -109,7 +111,7 @@ export const verifyPhone = async (
       payload: {
         status: false,
         message: "Error trying to verify account".concat(
-          devEnv ? ": " + error : ""
+          devEnv ? `: ${error}` : ""
         ),
       },
       code: 500,
@@ -145,7 +147,7 @@ export const updateProfile = async (
       payload: {
         status: false,
         message: "Error trying to update profile".concat(
-          devEnv ? ": " + error : ""
+          devEnv ? `: ${error}` : ""
         ),
       },
       code: 500,
@@ -171,7 +173,7 @@ export const updatePassword = async (
     if (!user.validatePassword(password))
       return { status: false, message: "Old password is Invalid" };
 
-    let update: any = { password: newPassword };
+    const update: any = { password: newPassword };
     if (logOtherDevicesOut) update.loginValidFrom = Date.now();
 
     await user.update(update);
@@ -181,8 +183,10 @@ export const updatePassword = async (
       message: "Password updated",
       data: logOtherDevicesOut
         ? jwt.generate({
-            payload: user.id,
-            loginValidFrom: user.loginValidFrom,
+            payload: {
+              payload: user.id,
+              loginValidFrom: user.loginValidFrom,
+            },
           })
         : null,
     };
@@ -191,7 +195,7 @@ export const updatePassword = async (
       payload: {
         status: false,
         message: "Error trying to updating password".concat(
-          devEnv ? ": " + error : ""
+          devEnv ? `: ${error}` : ""
         ),
       },
       code: 500,
@@ -214,13 +218,12 @@ export const logOtherDevicesOut = async (
     await user.update({ loginValidFrom: Date.now().toString() });
 
     const data: any = jwt.generate({
-      payload: user.id,
-      loginValidFrom: user.loginValidFrom,
+      payload: { payload: user.id, loginValidFrom: user.loginValidFrom },
     });
 
     return {
       status: true,
-      message: `Other Devices have been logged out`,
+      message: "Other Devices have been logged out",
       data,
     };
   } catch (error) {
@@ -228,7 +231,7 @@ export const logOtherDevicesOut = async (
       payload: {
         status: false,
         message: "Error trying to log other devices out".concat(
-          devEnv ? ": " + error : ""
+          devEnv ? `: ${error}` : ""
         ),
       },
       code: 500,
@@ -252,12 +255,12 @@ export const signOut = async (
       { where: { id: userId } }
     );
 
-    return { status: true, message: `Signed out` };
+    return { status: true, message: "Signed out" };
   } catch (error) {
     return {
       payload: {
         status: false,
-        message: "Error trying to sign out".concat(devEnv ? ": " + error : ""),
+        message: "Error trying to sign out".concat(devEnv ? `: ${error}` : ""),
       },
       code: 500,
     };
@@ -328,7 +331,7 @@ export const getAllUsers = async (
       payload: {
         status: false,
         message: "Error trying to get all users".concat(
-          devEnv ? ": " + error : ""
+          devEnv ? `: ${error}` : ""
         ),
       },
       code: 500,

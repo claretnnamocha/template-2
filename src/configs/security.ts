@@ -9,11 +9,9 @@ import { env } from "../configs";
 export const lock = (app: Express) => {
   if (env.env !== "development") {
     app.enable("trust proxy");
-    app.use((req, res, next) => {
-      req.secure
-        ? next()
-        : res.redirect("https://" + req.headers.host + req.url);
-    });
+    app.use((req, res, next) => (req.secure
+      ? next()
+      : res.redirect(`https://${req.headers.host}${req.url}`)));
   }
   const STS = sts.getSTS({
     "max-age": { days: 365 },
@@ -73,7 +71,7 @@ export const lock = (app: Express) => {
         xr: ["none"],
         xrSpatialTracking: ["none"],
       },
-    })
+    }),
   );
   app.use((req, res, next) => {
     res.setHeader("X-Content-Type-Options", "nosniff");

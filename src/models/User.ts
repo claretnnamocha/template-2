@@ -73,7 +73,7 @@ const User = db.define(
       defaultValue: "0",
     },
   },
-  { timestamps: true, tableName: "user" }
+  { timestamps: true, tableName: "user" },
 );
 
 User.prototype.toJSON = function () {

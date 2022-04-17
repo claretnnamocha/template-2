@@ -1,5 +1,6 @@
 import Joi from "joi";
 import passwordComplexity from "joi-password-complexity";
+
 const JoiPhone = Joi.extend(require("joi-phone-number"));
 
 export const signIn = {

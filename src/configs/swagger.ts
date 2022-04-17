@@ -5,7 +5,7 @@ import { env, port } from "./env";
 
 const description = () => fs.readFileSync("src/docs/description.md").toString();
 
-let apis = ["./src/docs/*.yml"];
+const apis = ["./src/docs/*.yml"];
 if (env === "development") apis.push("./src/docs/*.yaml");
 
 const swagger: Options = {

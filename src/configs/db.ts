@@ -33,11 +33,9 @@ export const authenticate = ({ clear = false }) => {
       console.log("Connection to Database has been established successfully.");
       const models = require("../models");
       const opts = clear ? { force: true } : { alter: true };
-      for (let schema in models) await models[schema].sync(opts);
+      for (const schema in models) await models[schema].sync(opts);
       if (clear) await seed(models);
       console.log("Migrated");
     })
-    .catch((error: SequelizeScopeError) =>
-      console.error("Unable to connect to the database: " + error.message)
-    );
+    .catch((error: SequelizeScopeError) => console.error(`Unable to connect to the database: ${error.message}`));
 };

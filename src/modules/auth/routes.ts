@@ -12,25 +12,25 @@ routes.post("/sign-in", validate(validator.signIn), controller(auth.signIn));
 routes.get(
   "/verify",
   validate(validator.verify),
-  controller(auth.verifyAccount)
+  controller(auth.verifyAccount),
 );
 
 routes.post(
   "/initiate-reset",
   validate(validator.initiateReset),
-  controller(auth.initiateReset)
+  controller(auth.initiateReset),
 );
 
 routes.get(
   "/verify-reset",
   validate(validator.verifyReset),
-  controller(auth.verifyReset)
+  controller(auth.verifyReset),
 );
 
 routes.put(
   "/reset-password",
   validate(validator.updateReset),
-  controller(auth.resetPassword)
+  controller(auth.resetPassword),
 );
 
 export default routes;

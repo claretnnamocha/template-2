@@ -25,7 +25,7 @@ export const authenticate =
       if (!userId || !loginValidFrom)
         return response(res, { status: false, message: "Unauthorized" }, 401);
 
-      let where: any = { id: userId, isDeleted: false, active: true };
+      const where: any = { id: userId, isDeleted: false, active: true };
 
       if (isAdmin) {
         where.role = "admin";
@@ -41,13 +41,13 @@ export const authenticate =
       req.form = req.form || {};
       req.form.userId = user.id;
 
-      next();
+      return next();
     } catch (error) {
       return response(
         res,
         {
           status: false,
-          message: "Unauthorized".concat(devEnv ? ": " + error : ""),
+          message: "Unauthorized".concat(devEnv ? `: ${error}` : ""),
         },
         401
       );

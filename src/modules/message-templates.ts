@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { displayName } from "../../package.json";
+
 const { FRONTEND_BASEURL } = process.env;
 
 export const registration = ({ token, username, email }) => {
@@ -10,19 +11,19 @@ export const registration = ({ token, username, email }) => {
     html: `
       <p>
         Dear ${username},
-        <span style="display: none !important">${uuid()}</span>
+       <span class="${uuid()}"></span>
       </p>
       Your registration on ${displayName} is successful.<br>
-      <span style="display: none !important">${uuid()}</span>
+     <span class="${uuid()}"></span>
       <p>
         To verify to your email click here <a href="${link}">${link}</a>
-        <span style="display: none !important">${uuid()}</span>
+       <span class="${uuid()}"></span>
       </p>
       <p>
         Clicking this link will securely verify your account on ${FRONTEND_BASEURL} using ${email}
-        <span style="display: none !important">${uuid()}</span>
+       <span class="${uuid()}"></span>
       </p>
-      <span style="display: none !important">${uuid()}</span>
+     <span class="${uuid()}"></span>
     `,
   };
 };
@@ -35,18 +36,18 @@ export const verifyEmail = ({ token, username, email }) => {
     html: `
       <p>
         Dear ${username},
-        <span style="display: none !important">${uuid()}</span>
+       <span class="${uuid()}"></span>
       </p>
         You requested to verify your email on ${displayName}.<br>
       <p>
         To verify to your email click here <a href="${link}">${link}</a>
-        <span style="display: none !important">${uuid()}</span>
+       <span class="${uuid()}"></span>
       </p>
       <p>
         Clicking this link will securely verify your account on ${FRONTEND_BASEURL} using ${email}
-        <span style="display: none !important">${uuid()}</span>
+       <span class="${uuid()}"></span>
       </p>
-      <span style="display: none !important">${uuid()}</span>
+     <span class="${uuid()}"></span>
     `,
   };
 };
@@ -62,14 +63,14 @@ export const resetPassword = ({ token, username }) => {
     html: `
     <p>
       Dear ${username},
-      <span style="display: none !important">${uuid()}</span>
+     <span class="${uuid()}"></span>
     </p>
       You requested to reset your password on ${displayName}.<br>
     <p>
       To reset to your password, click here <a href="${link}">${link}</a>
-      <span style="display: none !important">${uuid()}</span>
+     <span class="${uuid()}"></span>
     </p>
-    <span style="display: none !important">${uuid()}</span>
+   <span class="${uuid()}"></span>
     `,
   };
 };
