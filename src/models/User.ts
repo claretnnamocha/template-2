@@ -76,7 +76,7 @@ const User = db.define(
   { timestamps: true, tableName: "user" },
 );
 
-User.prototype.toJSON = function () {
+User.prototype.toJSON = function toJSON() {
   const data = this.dataValues;
 
   delete data.password;
@@ -93,7 +93,7 @@ User.prototype.toJSON = function () {
   return data;
 };
 
-User.prototype.validatePassword = function (val: string) {
+User.prototype.validatePassword = function validatePassword(val: string) {
   return bcrypt.compareSync(val, this.getDataValue("password"));
 };
 

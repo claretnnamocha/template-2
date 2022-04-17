@@ -52,8 +52,7 @@ export const verifyEmail = ({ token, username, email }) => {
   };
 };
 
-export const verifyPhone = ({ token, username }) =>
-  `Dear ${username}, Your ${displayName} verification code is ${token}`;
+export const verifyPhone = ({ token, username }) => `Dear ${username}, Your ${displayName} verification code is ${token}`;
 
 export const resetPassword = ({ token, username }) => {
   const link = `${FRONTEND_BASEURL}/auth/verify-reset?token=${token}`;

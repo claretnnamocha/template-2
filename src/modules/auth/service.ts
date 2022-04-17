@@ -28,6 +28,7 @@ export const generateToken = async ({
       capitalization: "uppercase",
     });
 
+    /* eslint-disable-next-line no-await-in-loop */
     exists = await User.findOne({
       where: {
         [`${tokenType}Token`]: token,
@@ -49,14 +50,18 @@ export const generateToken = async ({
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const signUp = async (
-  params: auth.SignUpRequest
+  params: auth.SignUpRequest,
 ): Promise<others.Response> => {
   try {
     const { email } = params;
 
-    for (const param of ["email", "phone"]) {
+    const fields = ["email", "phone"];
+    for (let i = 0; i < fields.length; i += 1) {
+      const param = fields[i];
       if (params[param]) {
         const where: any = { [param]: params[param] };
+
+        /* eslint-disable-next-line no-await-in-loop */
         const duplicate: UserSchema = await User.findOne({ where });
         if (duplicate) {
           return {
@@ -100,7 +105,7 @@ export const signUp = async (
       payload: {
         status: false,
         message: "Error trying to create account".concat(
-          devEnv ? ": " + error : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -114,7 +119,7 @@ export const signUp = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const signIn = async (
-  params: auth.SignInRequest
+  params: auth.SignInRequest,
 ): Promise<others.Response> => {
   try {
     const { user: identifier, password } = params;
@@ -179,7 +184,7 @@ export const signIn = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to login".concat(devEnv ? ": " + error : ""),
+        message: "Error trying to login".concat(devEnv ? `: ${error}` : ""),
       },
       code: 500,
     };
@@ -192,7 +197,7 @@ export const signIn = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const verifyAccount = async (
-  params: auth.VerifyRequest
+  params: auth.VerifyRequest,
 ): Promise<others.Response> => {
   try {
     const { token, email, resend } = params;
@@ -209,19 +214,20 @@ export const verifyAccount = async (
     }
 
     if (resend) {
-      if (user.verifiedemail)
+      if (user.verifiedemail) {
         return {
           payload: { status: false, message: "Profile is already verified" },
           code: 400,
         };
+      }
 
-      const token: string = await generateToken({
+      const generatedToken: string = await generateToken({
         userId: user.id,
         length: 10,
       });
 
       const { text, html } = msg.verifyEmail({
-        token,
+        token: generatedToken,
         username: user.email,
         email: user.email,
       });
@@ -236,7 +242,7 @@ export const verifyAccount = async (
       return { status: true, message: "Check your email" };
     }
 
-    if (!user.verifyToken || user.verifyToken != token) {
+    if (!user.verifyToken || user.verifyToken !== token) {
       return {
         payload: { status: false, message: "Invalid token" },
         code: 498,
@@ -245,7 +251,7 @@ export const verifyAccount = async (
 
     await user.update({ verifyToken: "" });
 
-    if (parseInt(user.tokenExpires) < Date.now()) {
+    if (parseInt(user.tokenExpires, 10) < Date.now()) {
       return {
         payload: { status: false, message: "Token expired" },
         code: 410,
@@ -263,7 +269,7 @@ export const verifyAccount = async (
       payload: {
         status: false,
         message: "Error trying to verify account".concat(
-          devEnv ? ": " + error : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -277,7 +283,7 @@ export const verifyAccount = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const initiateReset = async (
-  params: auth.InitiateResetRequest
+  params: auth.InitiateResetRequest,
 ): Promise<others.Response> => {
   try {
     const { email } = params;
@@ -321,7 +327,7 @@ export const initiateReset = async (
       payload: {
         status: false,
         message: "Error trying to initiate reset".concat(
-          devEnv ? ": " + error : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -335,7 +341,7 @@ export const initiateReset = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const verifyReset = async (
-  params: auth.VerifyRequest
+  params: auth.VerifyRequest,
 ): Promise<others.Response> => {
   try {
     const { token } = params;
@@ -353,7 +359,7 @@ export const verifyReset = async (
 
     await user.update({ resetToken: "" });
 
-    if (parseInt(user.tokenExpires) < Date.now()) {
+    if (parseInt(user.tokenExpires, 10) < Date.now()) {
       return {
         payload: { status: false, message: "Token expired" },
         code: 410,
@@ -376,7 +382,7 @@ export const verifyReset = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to login".concat(devEnv ? ": " + error : ""),
+        message: "Error trying to login".concat(devEnv ? `: ${error}` : ""),
       },
       code: 500,
     };
@@ -389,7 +395,7 @@ export const verifyReset = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const resetPassword = async (
-  params: auth.ResetPasswordRequest
+  params: auth.ResetPasswordRequest,
 ): Promise<others.Response> => {
   try {
     const { token, password, logOtherDevicesOut } = params;
@@ -407,14 +413,14 @@ export const resetPassword = async (
 
     await user.update({ updateToken: "" });
 
-    if (parseInt(user.tokenExpires) < Date.now()) {
+    if (parseInt(user.tokenExpires, 10) < Date.now()) {
       return {
         payload: { status: false, message: "Token expired" },
         code: 410,
       };
     }
 
-    let update: any = { password, tokenExpires: "0" };
+    const update: any = { password, tokenExpires: "0" };
     if (logOtherDevicesOut) update.loginValidFrom = Date.now();
 
     await user.update(update);
@@ -428,7 +434,7 @@ export const resetPassword = async (
       payload: {
         status: false,
         message: "Error trying to reset password".concat(
-          devEnv ? ": " + error : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,

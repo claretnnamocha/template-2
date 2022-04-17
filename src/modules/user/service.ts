@@ -3,7 +3,11 @@ import { devEnv } from "../../configs/env";
 import { jwt, sms } from "../../helpers";
 import { User } from "../../models";
 import { UserSchema } from "../../types/models";
-import { auth, others, user } from "../../types/services";
+import {
+  auth as authTypes,
+  others,
+  user as userTypes,
+} from "../../types/services";
 import { generateToken } from "../auth/service";
 import * as msg from "../message-templates";
 
@@ -13,7 +17,7 @@ import * as msg from "../message-templates";
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const getProfile = async (
-  params: others.LoggedIn
+  params: others.LoggedIn,
 ): Promise<others.Response> => {
   try {
     const { userId } = params;
@@ -33,7 +37,7 @@ export const getProfile = async (
       payload: {
         status: false,
         message: "Error trying to get profile".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -43,11 +47,11 @@ export const getProfile = async (
 
 /**
  * Verify user phone
- * @param {auth.VerifyRequest} params  Request Body
+ * @param {authTypes.VerifyRequest} params  Request Body
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const verifyPhone = async (
-  params: auth.VerifyRequest
+  params: authTypes.VerifyRequest,
 ): Promise<others.Response> => {
   try {
     const { token, userId } = params;
@@ -55,7 +59,7 @@ export const verifyPhone = async (
     let user: UserSchema = await User.findByPk(userId);
 
     if (!token) {
-      const token: string = await generateToken({
+      const generatedToken: string = await generateToken({
         userId,
         length: 6,
         charset: "numeric",
@@ -63,7 +67,7 @@ export const verifyPhone = async (
 
       const status = await sms.africastalking.send({
         to: user.phone,
-        body: msg.verifyPhone({ token, username: user.email }),
+        body: msg.verifyPhone({ token: generatedToken, username: user.email }),
       });
 
       if (status) await user.update({ verifiedphone: true });
@@ -93,7 +97,7 @@ export const verifyPhone = async (
 
     await user.update({ verifyToken: "" });
 
-    if (parseInt(user.tokenExpires) < Date.now()) {
+    if (parseInt(user.tokenExpires, 10) < Date.now()) {
       return {
         payload: { status: false, message: "Token expired" },
         code: 410,
@@ -111,7 +115,7 @@ export const verifyPhone = async (
       payload: {
         status: false,
         message: "Error trying to verify account".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -121,11 +125,11 @@ export const verifyPhone = async (
 
 /**
  * Update user profile
- * @param {user.UpdateRequest} params  Request Body
+ * @param {userTypes.UpdateRequest} params  Request Body
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const updateProfile = async (
-  params: user.UpdateRequest
+  params: userTypes.UpdateRequest,
 ): Promise<others.Response> => {
   try {
     const { userId } = params;
@@ -133,8 +137,6 @@ export const updateProfile = async (
     const user: UserSchema = await User.findOne({
       where: { id: userId, isDeleted: false },
     });
-
-    delete params.userId;
 
     await user.update(params);
 
@@ -147,7 +149,7 @@ export const updateProfile = async (
       payload: {
         status: false,
         message: "Error trying to update profile".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -157,21 +159,22 @@ export const updateProfile = async (
 
 /**
  * Update user password
- * @param {user.UpdatePasswordRequest} params  Request Body
+ * @param {userTypes.UpdatePasswordRequest} params  Request Body
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const updatePassword = async (
-  params: user.UpdatePasswordRequest
+  params: userTypes.UpdatePasswordRequest,
 ): Promise<others.Response> => {
   try {
-    const { userId, newPassword, password, logOtherDevicesOut } = params;
+    const {
+      userId, newPassword, password, logOtherDevicesOut,
+    } = params;
 
     const user: UserSchema = await User.findOne({
       where: { id: userId, isDeleted: false },
     });
 
-    if (!user.validatePassword(password))
-      return { status: false, message: "Old password is Invalid" };
+    if (!user.validatePassword(password)) return { status: false, message: "Old password is Invalid" };
 
     const update: any = { password: newPassword };
     if (logOtherDevicesOut) update.loginValidFrom = Date.now();
@@ -183,11 +186,11 @@ export const updatePassword = async (
       message: "Password updated",
       data: logOtherDevicesOut
         ? jwt.generate({
-            payload: {
-              payload: user.id,
-              loginValidFrom: user.loginValidFrom,
-            },
-          })
+          payload: {
+            payload: user.id,
+            loginValidFrom: user.loginValidFrom,
+          },
+        })
         : null,
     };
   } catch (error) {
@@ -195,7 +198,7 @@ export const updatePassword = async (
       payload: {
         status: false,
         message: "Error trying to updating password".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -209,7 +212,7 @@ export const updatePassword = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const logOtherDevicesOut = async (
-  params: others.LoggedIn
+  params: others.LoggedIn,
 ): Promise<others.Response> => {
   try {
     const { userId } = params;
@@ -231,7 +234,7 @@ export const logOtherDevicesOut = async (
       payload: {
         status: false,
         message: "Error trying to log other devices out".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -245,14 +248,14 @@ export const logOtherDevicesOut = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const signOut = async (
-  params: others.LoggedIn
+  params: others.LoggedIn,
 ): Promise<others.Response> => {
   try {
     const { userId } = params;
 
     await User.update(
       { loginValidFrom: Date.now().toString() },
-      { where: { id: userId } }
+      { where: { id: userId } },
     );
 
     return { status: true, message: "Signed out" };
@@ -269,11 +272,11 @@ export const signOut = async (
 
 /**
  * Get all users' profile
- * @param {user.GetAll} params  Request Body
+ * @param {userTypes.GetAll} params  Request Body
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const getAllUsers = async (
-  params: user.GetAll
+  params: userTypes.GetAll,
 ): Promise<others.Response> => {
   try {
     const {
@@ -303,8 +306,7 @@ export const getAllUsers = async (
     if (role) where = { ...where, role };
     if (dob) where = { ...where, dob };
 
-    if (permissions)
-      where = { ...where, permissions: { [Op.in]: permissions } };
+    if (permissions) where = { ...where, permissions: { [Op.in]: permissions } };
 
     if ("verifiedemail" in params) where = { ...where, verifiedemail };
     if ("verifiedphone" in params) where = { ...where, verifiedphone };
@@ -331,7 +333,7 @@ export const getAllUsers = async (
       payload: {
         status: false,
         message: "Error trying to get all users".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,

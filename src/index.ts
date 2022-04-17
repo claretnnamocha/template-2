@@ -32,6 +32,7 @@ app.use((err: Error, _: Request, res: Response) => response(
 
 if (require.main) {
   app.listen(port, () => {
+    /* eslint-disable-next-line */
     console.log(
       `${displayName} is running on http://localhost:${port} (${env.env})`,
     );

@@ -1,6 +1,6 @@
 import { Sequelize, SequelizeScopeError } from "sequelize";
-import { v4 as uuid } from "uuid";
-import { dbSecure, dbURL } from "./env";
+import { dbSecure, dbURL } from "../env";
+import { seed } from "./seed";
 
 export const db = new Sequelize(dbURL, {
   dialectOptions: !dbSecure
@@ -9,33 +9,29 @@ export const db = new Sequelize(dbURL, {
   logging: false,
 });
 
-const seed = async (models: any) => {
-  console.log("DB cleared");
-
-  await models.User.create({
-    id: uuid(),
-    email: "devclareo@gmail.com",
-    firstname: "Claret",
-    lastname: "Nnamocha",
-    password: "Password123!",
-    roles: "super-admin",
-    verifiedemail: true,
-  });
-
-  // todo: plant other db seeds 😎
-
-  console.log("Seeded");
-};
-
 export const authenticate = ({ clear = false }) => {
   db.authenticate()
     .then(async () => {
+      /* eslint-disable-next-line */
       console.log("Connection to Database has been established successfully.");
-      const models = require("../models");
+
+      const models = import("../../models");
       const opts = clear ? { force: true } : { alter: true };
-      for (const schema in models) await models[schema].sync(opts);
+
+      const promises = [];
+      const keys = Object.keys(models);
+      for (let i = 0; i < keys.length; i += 1) {
+        const schema = keys[i];
+        promises.push(models[schema].sync(opts));
+      }
+      await Promise.all(promises);
+
       if (clear) await seed(models);
-      console.log("Migrated");
+
+      /* eslint-disable-next-line */
+      console.log("Database Migrated");
     })
+
+    /* eslint-disable-next-line */
     .catch((error: SequelizeScopeError) => console.error(`Unable to connect to the database: ${error.message}`));
 };
