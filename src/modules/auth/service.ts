@@ -100,7 +100,7 @@ export const signUp = async (
       payload: {
         status: false,
         message: "Error trying to create account".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? ": " + error : ""
         ),
       },
       code: 500,
@@ -117,42 +117,42 @@ export const signIn = async (
   params: auth.SignInRequest
 ): Promise<others.Response> => {
   try {
-    const { user, password } = params;
+    const { user: identifier, password } = params;
 
-    const _user: UserSchema = await User.findOne({
+    const user: UserSchema = await User.findOne({
       where: {
-        [Op.or]: [{ email: user }, { phone: user }],
+        [Op.or]: [{ email: identifier }, { phone: identifier }],
       },
     });
 
-    if (!_user || !bcrypt.compareSync(password, _user.password)) {
+    if (!user || !bcrypt.compareSync(password, user.password)) {
       return {
         payload: { status: false, message: "Invalid username or password" },
         code: 401,
       };
     }
 
-    if (!_user.active) {
+    if (!user.active) {
       return {
         payload: { status: false, message: "Account is banned contact admin" },
         code: 403,
       };
     }
 
-    if (!_user.verifiedemail) {
+    if (!user.verifiedemail) {
       const token: string = await generateToken({
-        userId: _user.id,
+        userId: user.id,
         length: 10,
       });
 
       const { text, html } = msg.verifyEmail({
         token,
-        username: _user.email,
-        email: _user.email,
+        username: user.email,
+        email: user.email,
       });
 
       sendEmail({
-        to: _user.email,
+        to: user.email,
         subject: "Verify your email",
         text,
         html,
@@ -164,9 +164,14 @@ export const signIn = async (
       };
     }
 
-    const data: any = _user.toJSON();
+    const { id, loginValidFrom } = user;
+    const data: any = user.toJSON();
+
     data.token = jwt.generate({
-      payload: { payload: _user.id, loginValidFrom: _user.loginValidFrom },
+      payload: {
+        payload: id,
+        loginValidFrom,
+      },
     });
 
     return { status: true, message: "Login successful", data };
@@ -174,7 +179,7 @@ export const signIn = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to login".concat(devEnv ? `: ${error}` : ""),
+        message: "Error trying to login".concat(devEnv ? ": " + error : ""),
       },
       code: 500,
     };
@@ -204,12 +209,11 @@ export const verifyAccount = async (
     }
 
     if (resend) {
-      if (user.verifiedemail) {
+      if (user.verifiedemail)
         return {
           payload: { status: false, message: "Profile is already verified" },
           code: 400,
         };
-      }
 
       const token: string = await generateToken({
         userId: user.id,
@@ -259,7 +263,7 @@ export const verifyAccount = async (
       payload: {
         status: false,
         message: "Error trying to verify account".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? ": " + error : ""
         ),
       },
       code: 500,
@@ -317,7 +321,7 @@ export const initiateReset = async (
       payload: {
         status: false,
         message: "Error trying to initiate reset".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? ": " + error : ""
         ),
       },
       code: 500,
@@ -372,7 +376,7 @@ export const verifyReset = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to login".concat(devEnv ? `: ${error}` : ""),
+        message: "Error trying to login".concat(devEnv ? ": " + error : ""),
       },
       code: 500,
     };
@@ -410,7 +414,7 @@ export const resetPassword = async (
       };
     }
 
-    const update: any = { password, tokenExpires: "0" };
+    let update: any = { password, tokenExpires: "0" };
     if (logOtherDevicesOut) update.loginValidFrom = Date.now();
 
     await user.update(update);
@@ -424,7 +428,7 @@ export const resetPassword = async (
       payload: {
         status: false,
         message: "Error trying to reset password".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? ": " + error : ""
         ),
       },
       code: 500,
