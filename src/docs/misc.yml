@@ -1,3 +1,22 @@
+paths:
+  /misc/ping/{message}:
+    get:
+      tags:
+        - Misc
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: message
+          required: true
+      responses:
+        200:
+          description: Success
+        400:
+          description: Error
+        500:
+          description: Server down
+
 securityDefinitions:
   Bearer:
     type: apiKey

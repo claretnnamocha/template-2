@@ -14,4 +14,8 @@ interface ServiceAndCodeResponse {
   code: number;
 }
 
+export interface Ping {
+  message?: string;
+}
+
 export type Response = ServiceResponse | ServiceAndCodeResponse;

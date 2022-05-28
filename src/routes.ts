@@ -2,11 +2,14 @@ import { Response, Router } from "express";
 import { response } from "./helpers";
 import { authenticate } from "./middlewares";
 import auth from "./modules/auth/routes";
+import misc from "./modules/misc/routes";
 import user from "./modules/user/routes";
 
 const routes = Router();
 
 routes.use("/auth", auth);
+
+routes.use("/misc", misc);
 
 routes.use(authenticate({}));
 
