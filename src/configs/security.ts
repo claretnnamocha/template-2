@@ -4,18 +4,16 @@ import PP from "permissions-policy";
 import RP from "referrer-policy";
 import sts from "strict-transport-security";
 import XFP from "x-frame-options";
-import { env } from "../configs";
 import rateLimit from "express-rate-limit";
+import { env } from "../configs";
 import { response } from "../helpers";
 
 export const lock = (app: Express) => {
   if (env.env !== "development") {
     app.enable("trust proxy");
-    app.use((req, res, next) =>
-      req.secure
-        ? next()
-        : res.redirect(`https://${req.headers.host}${req.url}`)
-    );
+    app.use((req, res, next) => (req.secure
+      ? next()
+      : res.redirect(`https://${req.headers.host}${req.url}`)));
   }
   const STS = sts.getSTS({
     "max-age": { days: 365 },
@@ -75,19 +73,19 @@ export const lock = (app: Express) => {
         xr: ["none"],
         xrSpatialTracking: ["none"],
       },
-    })
+    }),
   );
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    handler: (req, res, next, options) =>
-      response(
-        res,
-        { status: false, message: options.message },
-        options.statusCode
-      ),
+    handler: (req, res, next, options) => response(
+      res,
+      { status: false, message: options.message },
+      options.statusCode,
+    ),
+    skipFailedRequests: true,
   });
   app.use(limiter);
   app.use((req, res, next) => {
