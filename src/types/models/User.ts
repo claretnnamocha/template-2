@@ -13,20 +13,17 @@ export interface User {
   verifiedemail?: boolean;
   verifiedphone?: boolean;
   active?: boolean;
-  createdAt?: Date;
-  loginValidFrom?: string;
+  token?: string;
   totp?: {
     secret: string;
     uri: string;
     qr: string;
   };
+  loginValidFrom?: string;
   validatePassword?: Function;
   validateTotp?: Function;
+  createdAt?: Date;
   updatedAt?: Date;
-  verifyToken?: string;
-  resetToken?: string;
-  updateToken?: string;
-  tokenExpires?: string;
 }
 
 export interface UserSchema extends Model<User>, User {}

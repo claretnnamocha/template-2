@@ -60,29 +60,17 @@ const User = db.define(
       allowNull: false,
     },
     totp: { type: DataTypes.JSONB },
+    token: {
+      type: DataTypes.STRING,
+      defaultValue: null,
+    },
     loginValidFrom: {
       type: DataTypes.STRING,
       defaultValue: Date.now(),
       allowNull: false,
     },
-    verifyToken: {
-      type: DataTypes.STRING,
-      defaultValue: null,
-    },
-    resetToken: {
-      type: DataTypes.STRING,
-      defaultValue: null,
-    },
-    updateToken: {
-      type: DataTypes.STRING,
-      defaultValue: null,
-    },
-    tokenExpires: {
-      type: DataTypes.STRING,
-      defaultValue: "0",
-    },
   },
-  { timestamps: true, tableName: "user" },
+  { timestamps: true, tableName: "user" }
 );
 
 User.prototype.toJSON = function toJSON() {
@@ -90,10 +78,7 @@ User.prototype.toJSON = function toJSON() {
 
   delete data.totp;
   delete data.password;
-  delete data.verifyToken;
-  delete data.resetToken;
-  delete data.updateToken;
-  delete data.tokenExpires;
+  delete data.token;
   delete data.loginValidFrom;
   delete data.role;
   delete data.permissions;
@@ -111,7 +96,7 @@ User.prototype.validateTotp = function validatePassword(val: string) {
   const valid = twofactor.verifyToken(
     this.getDataValue("totp").secret,
     val,
-    totpWindow,
+    totpWindow
   );
   return valid && valid.delta === 0;
 };

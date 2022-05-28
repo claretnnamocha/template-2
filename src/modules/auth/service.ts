@@ -17,31 +17,19 @@ export const generateToken = async ({
   charset = "alphanumeric",
   length = 5,
 }) => {
-  const user = await User.findByPk(userId);
+  const expiry = Date.now() + 60 * 1000 * expiresMins;
 
-  let token: string;
-  let exists: UserSchema;
-  do {
-    token = randomstring.generate({
-      charset,
-      length,
-      capitalization: "uppercase",
-    });
-
-    /* eslint-disable-next-line no-await-in-loop */
-    exists = await User.findOne({
-      where: {
-        [`${tokenType}Token`]: token,
-      },
-    });
-  } while (exists);
-
-  await user.update({
-    [`${tokenType}Token`]: token,
-    tokenExpires: Date.now() + 60 * 1000 * expiresMins,
+  const theToken = randomstring.generate({
+    charset,
+    length,
+    capitalization: "uppercase",
   });
 
-  return token;
+  const token = [theToken, tokenType, expiry].join("_");
+
+  await User.update({ token }, { where: { id: userId } });
+
+  return theToken;
 };
 
 /**
@@ -50,7 +38,7 @@ export const generateToken = async ({
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const signUp = async (
-  params: auth.SignUpRequest,
+  params: auth.SignUpRequest
 ): Promise<others.Response> => {
   try {
     const { email } = params;
@@ -105,7 +93,7 @@ export const signUp = async (
       payload: {
         status: false,
         message: "Error trying to create account".concat(
-          devEnv ? `: ${error}` : "",
+          devEnv ? `: ${error}` : ""
         ),
       },
       code: 500,
@@ -119,7 +107,7 @@ export const signUp = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const signIn = async (
-  params: auth.SignInRequest,
+  params: auth.SignInRequest
 ): Promise<others.Response> => {
   try {
     const { user: identifier, password } = params;
@@ -197,7 +185,7 @@ export const signIn = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const verifyAccount = async (
-  params: auth.VerifyRequest,
+  params: auth.VerifyRequest
 ): Promise<others.Response> => {
   try {
     const { token, email, resend } = params;
@@ -242,23 +230,25 @@ export const verifyAccount = async (
       return { status: true, message: "Check your email" };
     }
 
-    if (!user.verifyToken || user.verifyToken !== token) {
+    const { token: dbToken } = user;
+    await user.update({ token: "" });
+    const [theToken, tokenType, expiry] = dbToken.split("_");
+
+    if (tokenType !== "verify" || theToken !== token) {
       return {
         payload: { status: false, message: "Invalid token" },
         code: 498,
       };
     }
 
-    await user.update({ verifyToken: "" });
-
-    if (parseInt(user.tokenExpires, 10) < Date.now()) {
+    if (parseInt(expiry, 10) < Date.now()) {
       return {
         payload: { status: false, message: "Token expired" },
         code: 410,
       };
     }
 
-    await user.update({ verifiedemail: true, tokenExpires: "0" });
+    await user.update({ verifiedemail: true });
 
     return {
       payload: { status: true, message: "Account verified" },
@@ -269,7 +259,7 @@ export const verifyAccount = async (
       payload: {
         status: false,
         message: "Error trying to verify account".concat(
-          devEnv ? `: ${error}` : "",
+          devEnv ? `: ${error}` : ""
         ),
       },
       code: 500,
@@ -283,7 +273,7 @@ export const verifyAccount = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const initiateReset = async (
-  params: auth.InitiateResetRequest,
+  params: auth.InitiateResetRequest
 ): Promise<others.Response> => {
   try {
     const { email } = params;
@@ -327,7 +317,7 @@ export const initiateReset = async (
       payload: {
         status: false,
         message: "Error trying to initiate reset".concat(
-          devEnv ? `: ${error}` : "",
+          devEnv ? `: ${error}` : ""
         ),
       },
       code: 500,
@@ -341,13 +331,13 @@ export const initiateReset = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const verifyReset = async (
-  params: auth.VerifyRequest,
+  params: auth.VerifyRequest
 ): Promise<others.Response> => {
   try {
     const { token } = params;
 
     const user: UserSchema = await User.findOne({
-      where: { resetToken: token, isDeleted: false, active: true },
+      where: { token: { [Op.like]: `${token}_reset_%` } },
     });
 
     if (!user) {
@@ -357,16 +347,24 @@ export const verifyReset = async (
       };
     }
 
-    await user.update({ resetToken: "" });
+    const { token: dbToken } = user;
+    await user.update({ token: "" });
 
-    if (parseInt(user.tokenExpires, 10) < Date.now()) {
+    const [theToken, tokenType, expiry] = dbToken.split("_");
+
+    if (tokenType !== "reset" || token !== theToken) {
+      return {
+        payload: { status: false, message: "Invalid token" },
+        code: 498,
+      };
+    }
+
+    if (parseInt(expiry, 10) < Date.now()) {
       return {
         payload: { status: false, message: "Token expired" },
         code: 410,
       };
     }
-
-    await user.update({ tokenExpires: "0" });
 
     const data: string = await generateToken({
       userId: user.id,
@@ -395,13 +393,13 @@ export const verifyReset = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const resetPassword = async (
-  params: auth.ResetPasswordRequest,
+  params: auth.ResetPasswordRequest
 ): Promise<others.Response> => {
   try {
     const { token, password, logOtherDevicesOut } = params;
 
     const user: UserSchema = await User.findOne({
-      where: { updateToken: token, isDeleted: false, active: true },
+      where: { token: { [Op.like]: `${token}_update_%` } },
     });
 
     if (!user) {
@@ -410,17 +408,26 @@ export const resetPassword = async (
         code: 498,
       };
     }
+    const { token: dbToken } = user;
+    await user.update({ token: "" });
 
-    await user.update({ updateToken: "" });
+    const [theToken, tokenType, expiry] = dbToken.split("_");
 
-    if (parseInt(user.tokenExpires, 10) < Date.now()) {
+    if (tokenType !== "update" || token !== theToken) {
+      return {
+        payload: { status: false, message: "Invalid token" },
+        code: 498,
+      };
+    }
+
+    if (parseInt(expiry, 10) < Date.now()) {
       return {
         payload: { status: false, message: "Token expired" },
         code: 410,
       };
     }
 
-    const update: any = { password, tokenExpires: "0" };
+    const update: any = { password };
     if (logOtherDevicesOut) update.loginValidFrom = Date.now();
 
     await user.update(update);
@@ -434,7 +441,7 @@ export const resetPassword = async (
       payload: {
         status: false,
         message: "Error trying to reset password".concat(
-          devEnv ? `: ${error}` : "",
+          devEnv ? `: ${error}` : ""
         ),
       },
       code: 500,

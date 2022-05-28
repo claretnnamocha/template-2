@@ -81,9 +81,7 @@ export const verifyPhone = async (
 
     user = await User.findOne({
       where: {
-        verifyToken: token,
-        isDeleted: false,
-        active: true,
+        token: { [Op.like]: `${token}_verify_%` },
         id: userId,
       },
     });
@@ -94,17 +92,26 @@ export const verifyPhone = async (
         code: 498,
       };
     }
+    const { token: dbToken } = user;
+    await user.update({ token: "" });
 
-    await user.update({ verifyToken: "" });
+    const [theToken, tokenType, expiry] = dbToken.split("_");
 
-    if (parseInt(user.tokenExpires, 10) < Date.now()) {
+    if (tokenType !== "verify" || token !== theToken) {
+      return {
+        payload: { status: false, message: "Invalid token" },
+        code: 498,
+      };
+    }
+
+    if (parseInt(expiry, 10) < Date.now()) {
       return {
         payload: { status: false, message: "Token expired" },
         code: 410,
       };
     }
 
-    await user.update({ verifiedemail: true, tokenExpires: "0" });
+    await user.update({ verifiedphone: true });
 
     return {
       payload: { status: true, message: "Account verified" },
