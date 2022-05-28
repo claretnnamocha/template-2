@@ -12,6 +12,7 @@ const schema = Joi.object({
   JWT_SECRET: Joi.string().required(),
   DB_URL: Joi.string().required().description("Database connection URL"),
   DB_SECURE: Joi.boolean().default(false),
+  CLEAR_DB: Joi.boolean().default(false),
 })
   .unknown()
   .required();
@@ -26,4 +27,5 @@ export const dbURL = value.DB_URL;
 export const totpWindow = value.TOTP_WINDOW;
 export const jwtSecret = value.JWT_SECRET;
 export const dbSecure = value.DB_SECURE;
+export const clearDb = value.CLEAR_DB;
 export const devEnv = env === "development";

@@ -15,7 +15,7 @@ export const authenticate = ({ clear = false }) => {
       /* eslint-disable-next-line */
       console.log("Connection to Database has been established successfully.");
 
-      const models = import("../../models");
+      const models = await import("../../models");
       const opts = clear ? { force: true } : { alter: true };
 
       const promises = [];

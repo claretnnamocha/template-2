@@ -88,6 +88,7 @@ const User = db.define(
 User.prototype.toJSON = function toJSON() {
   const data = this.dataValues;
 
+  delete data.totp;
   delete data.password;
   delete data.verifyToken;
   delete data.resetToken;
@@ -108,7 +109,7 @@ User.prototype.validatePassword = function validatePassword(val: string) {
 
 User.prototype.validateTotp = function validatePassword(val: string) {
   const valid = twofactor.verifyToken(
-    this.getDataValue("password").secret,
+    this.getDataValue("totp").secret,
     val,
     totpWindow,
   );

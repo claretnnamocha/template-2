@@ -15,7 +15,11 @@ export interface User {
   active?: boolean;
   createdAt?: Date;
   loginValidFrom?: string;
-  totp?: any;
+  totp?: {
+    secret: string;
+    uri: string;
+    qr: string;
+  };
   validatePassword?: Function;
   validateTotp?: Function;
   updatedAt?: Date;

@@ -10,8 +10,8 @@ import { response } from "./helpers";
 import routes from "./routes";
 
 const app = express();
-const { port } = env;
-db.authenticate({});
+const { port, clearDb } = env;
+db.authenticate({ clear: clearDb });
 
 app.use(formdata.parse());
 app.use(express.json({ limit: "100mb", type: "application/json" }));
