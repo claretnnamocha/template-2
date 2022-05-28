@@ -17,7 +17,7 @@ import * as msg from "../message-templates";
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const getProfile = async (
-  params: others.LoggedIn
+  params: others.LoggedIn,
 ): Promise<others.Response> => {
   try {
     const { userId } = params;
@@ -37,7 +37,7 @@ export const getProfile = async (
       payload: {
         status: false,
         message: "Error trying to get profile".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -51,7 +51,7 @@ export const getProfile = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const verifyPhone = async (
-  params: authTypes.VerifyRequest
+  params: authTypes.VerifyRequest,
 ): Promise<others.Response> => {
   try {
     const { token, userId } = params;
@@ -122,7 +122,7 @@ export const verifyPhone = async (
       payload: {
         status: false,
         message: "Error trying to verify account".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -136,7 +136,7 @@ export const verifyPhone = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const updateProfile = async (
-  params: userTypes.UpdateRequest
+  params: userTypes.UpdateRequest,
 ): Promise<others.Response> => {
   try {
     const { userId } = params;
@@ -156,7 +156,7 @@ export const updateProfile = async (
       payload: {
         status: false,
         message: "Error trying to update profile".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -170,17 +170,18 @@ export const updateProfile = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const updatePassword = async (
-  params: userTypes.UpdatePasswordRequest
+  params: userTypes.UpdatePasswordRequest,
 ): Promise<others.Response> => {
   try {
-    const { userId, newPassword, password, logOtherDevicesOut } = params;
+    const {
+      userId, newPassword, password, logOtherDevicesOut,
+    } = params;
 
     const user: UserSchema = await User.findOne({
       where: { id: userId, isDeleted: false },
     });
 
-    if (!user.validatePassword(password))
-      return { status: false, message: "Old password is Invalid" };
+    if (!user.validatePassword(password)) return { status: false, message: "Old password is Invalid" };
 
     const update: any = { password: newPassword };
     if (logOtherDevicesOut) update.loginValidFrom = Date.now();
@@ -192,11 +193,11 @@ export const updatePassword = async (
       message: "Password updated",
       data: logOtherDevicesOut
         ? jwt.generate({
-            payload: {
-              payload: user.id,
-              loginValidFrom: user.loginValidFrom,
-            },
-          })
+          payload: {
+            payload: user.id,
+            loginValidFrom: user.loginValidFrom,
+          },
+        })
         : null,
     };
   } catch (error) {
@@ -204,7 +205,7 @@ export const updatePassword = async (
       payload: {
         status: false,
         message: "Error trying to updating password".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -218,7 +219,7 @@ export const updatePassword = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const logOtherDevicesOut = async (
-  params: others.LoggedIn
+  params: others.LoggedIn,
 ): Promise<others.Response> => {
   try {
     const { userId } = params;
@@ -240,7 +241,7 @@ export const logOtherDevicesOut = async (
       payload: {
         status: false,
         message: "Error trying to log other devices out".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -254,14 +255,14 @@ export const logOtherDevicesOut = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const signOut = async (
-  params: others.LoggedIn
+  params: others.LoggedIn,
 ): Promise<others.Response> => {
   try {
     const { userId } = params;
 
     await User.update(
       { loginValidFrom: Date.now().toString() },
-      { where: { id: userId } }
+      { where: { id: userId } },
     );
 
     return { status: true, message: "Signed out" };
@@ -282,7 +283,7 @@ export const signOut = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const getAllUsers = async (
-  params: userTypes.GetAll
+  params: userTypes.GetAll,
 ): Promise<others.Response> => {
   try {
     const {
@@ -312,8 +313,7 @@ export const getAllUsers = async (
     if (role) where = { ...where, role };
     if (dob) where = { ...where, dob };
 
-    if (permissions)
-      where = { ...where, permissions: { [Op.in]: permissions } };
+    if (permissions) where = { ...where, permissions: { [Op.in]: permissions } };
 
     if ("verifiedemail" in params) where = { ...where, verifiedemail };
     if ("verifiedphone" in params) where = { ...where, verifiedphone };
@@ -340,7 +340,7 @@ export const getAllUsers = async (
       payload: {
         status: false,
         message: "Error trying to get all users".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -354,7 +354,7 @@ export const getAllUsers = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const getTotpQrCode = async (
-  params: userTypes.UpdateRequest
+  params: userTypes.UpdateRequest,
 ): Promise<others.Response> => {
   try {
     const { userId } = params;
@@ -375,7 +375,7 @@ export const getTotpQrCode = async (
       payload: {
         status: false,
         message: "Error trying to get totp qr code".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -389,7 +389,7 @@ export const getTotpQrCode = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const validateTotp = async (
-  params: userTypes.ValidateTotp
+  params: userTypes.ValidateTotp,
 ): Promise<others.Response> => {
   try {
     const { userId, token } = params;
@@ -417,7 +417,7 @@ export const validateTotp = async (
       payload: {
         status: false,
         message: "Error trying to validate totp".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,

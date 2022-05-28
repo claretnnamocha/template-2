@@ -38,7 +38,7 @@ export const generateToken = async ({
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const signUp = async (
-  params: auth.SignUpRequest
+  params: auth.SignUpRequest,
 ): Promise<others.Response> => {
   try {
     const { email } = params;
@@ -93,7 +93,7 @@ export const signUp = async (
       payload: {
         status: false,
         message: "Error trying to create account".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -107,7 +107,7 @@ export const signUp = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const signIn = async (
-  params: auth.SignInRequest
+  params: auth.SignInRequest,
 ): Promise<others.Response> => {
   try {
     const { user: identifier, password } = params;
@@ -185,7 +185,7 @@ export const signIn = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const verifyAccount = async (
-  params: auth.VerifyRequest
+  params: auth.VerifyRequest,
 ): Promise<others.Response> => {
   try {
     const { token, email, resend } = params;
@@ -259,7 +259,7 @@ export const verifyAccount = async (
       payload: {
         status: false,
         message: "Error trying to verify account".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -273,7 +273,7 @@ export const verifyAccount = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const initiateReset = async (
-  params: auth.InitiateResetRequest
+  params: auth.InitiateResetRequest,
 ): Promise<others.Response> => {
   try {
     const { email } = params;
@@ -317,7 +317,7 @@ export const initiateReset = async (
       payload: {
         status: false,
         message: "Error trying to initiate reset".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -331,7 +331,7 @@ export const initiateReset = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const verifyReset = async (
-  params: auth.VerifyRequest
+  params: auth.VerifyRequest,
 ): Promise<others.Response> => {
   try {
     const { token } = params;
@@ -393,7 +393,7 @@ export const verifyReset = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const resetPassword = async (
-  params: auth.ResetPasswordRequest
+  params: auth.ResetPasswordRequest,
 ): Promise<others.Response> => {
   try {
     const { token, password, logOtherDevicesOut } = params;
@@ -441,7 +441,7 @@ export const resetPassword = async (
       payload: {
         status: false,
         message: "Error trying to reset password".concat(
-          devEnv ? `: ${error}` : ""
+          devEnv ? `: ${error}` : "",
         ),
       },
       code: 500,

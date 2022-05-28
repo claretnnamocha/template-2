@@ -70,7 +70,7 @@ const User = db.define(
       allowNull: false,
     },
   },
-  { timestamps: true, tableName: "user" }
+  { timestamps: true, tableName: "user" },
 );
 
 User.prototype.toJSON = function toJSON() {
@@ -96,7 +96,7 @@ User.prototype.validateTotp = function validatePassword(val: string) {
   const valid = twofactor.verifyToken(
     this.getDataValue("totp").secret,
     val,
-    totpWindow
+    totpWindow,
   );
   return valid && valid.delta === 0;
 };
