@@ -85,7 +85,6 @@ export const lock = (app: Express) => {
       { status: false, message: options.message },
       options.statusCode,
     ),
-    skipFailedRequests: true,
   });
   app.use(limiter);
   app.use((req, res, next) => {
