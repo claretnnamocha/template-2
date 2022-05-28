@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import randomstring from "randomstring";
 import { Op } from "sequelize";
 import { v4 as uuid } from "uuid";
-import { devEnv } from "../../configs/env";
+import { debug } from "../../configs/env";
 import { jwt } from "../../helpers";
 import { sendEmail } from "../../jobs";
 import { User } from "../../models";
@@ -93,7 +93,7 @@ export const signUp = async (
       payload: {
         status: false,
         message: "Error trying to create account".concat(
-          devEnv ? `: ${error}` : "",
+          debug ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -172,7 +172,7 @@ export const signIn = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to login".concat(devEnv ? `: ${error}` : ""),
+        message: "Error trying to login".concat(debug ? `: ${error}` : ""),
       },
       code: 500,
     };
@@ -259,7 +259,7 @@ export const verifyAccount = async (
       payload: {
         status: false,
         message: "Error trying to verify account".concat(
-          devEnv ? `: ${error}` : "",
+          debug ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -317,7 +317,7 @@ export const initiateReset = async (
       payload: {
         status: false,
         message: "Error trying to initiate reset".concat(
-          devEnv ? `: ${error}` : "",
+          debug ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -380,7 +380,7 @@ export const verifyReset = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to login".concat(devEnv ? `: ${error}` : ""),
+        message: "Error trying to login".concat(debug ? `: ${error}` : ""),
       },
       code: 500,
     };
@@ -441,7 +441,7 @@ export const resetPassword = async (
       payload: {
         status: false,
         message: "Error trying to reset password".concat(
-          devEnv ? `: ${error}` : "",
+          debug ? `: ${error}` : "",
         ),
       },
       code: 500,

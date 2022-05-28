@@ -1,4 +1,4 @@
-import { devEnv } from "../../configs/env";
+import { debug } from "../../configs/env";
 import { others } from "../../types/services";
 
 /**
@@ -15,7 +15,7 @@ export const ping = async (params: others.Ping): Promise<others.Response> => {
       payload: {
         status: false,
         message: "Error trying to ping server".concat(
-          devEnv ? `: ${error}` : "",
+          debug ? `: ${error}` : "",
         ),
       },
       code: 500,

@@ -1,5 +1,5 @@
 import { Op } from "sequelize";
-import { devEnv } from "../../configs/env";
+import { debug } from "../../configs/env";
 import { jwt, sms } from "../../helpers";
 import { User } from "../../models";
 import { UserSchema } from "../../types/models";
@@ -37,7 +37,7 @@ export const getProfile = async (
       payload: {
         status: false,
         message: "Error trying to get profile".concat(
-          devEnv ? `: ${error}` : "",
+          debug ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -122,7 +122,7 @@ export const verifyPhone = async (
       payload: {
         status: false,
         message: "Error trying to verify account".concat(
-          devEnv ? `: ${error}` : "",
+          debug ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -156,7 +156,7 @@ export const updateProfile = async (
       payload: {
         status: false,
         message: "Error trying to update profile".concat(
-          devEnv ? `: ${error}` : "",
+          debug ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -205,7 +205,7 @@ export const updatePassword = async (
       payload: {
         status: false,
         message: "Error trying to updating password".concat(
-          devEnv ? `: ${error}` : "",
+          debug ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -241,7 +241,7 @@ export const logOtherDevicesOut = async (
       payload: {
         status: false,
         message: "Error trying to log other devices out".concat(
-          devEnv ? `: ${error}` : "",
+          debug ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -270,7 +270,7 @@ export const signOut = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to sign out".concat(devEnv ? `: ${error}` : ""),
+        message: "Error trying to sign out".concat(debug ? `: ${error}` : ""),
       },
       code: 500,
     };
@@ -340,7 +340,7 @@ export const getAllUsers = async (
       payload: {
         status: false,
         message: "Error trying to get all users".concat(
-          devEnv ? `: ${error}` : "",
+          debug ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -375,7 +375,7 @@ export const getTotpQrCode = async (
       payload: {
         status: false,
         message: "Error trying to get totp qr code".concat(
-          devEnv ? `: ${error}` : "",
+          debug ? `: ${error}` : "",
         ),
       },
       code: 500,
@@ -417,7 +417,7 @@ export const validateTotp = async (
       payload: {
         status: false,
         message: "Error trying to validate totp".concat(
-          devEnv ? `: ${error}` : "",
+          debug ? `: ${error}` : "",
         ),
       },
       code: 500,

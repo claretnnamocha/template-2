@@ -1,7 +1,7 @@
 import { NextFunction, Response } from "express";
 import JWT from "jsonwebtoken";
 import { env } from "../configs";
-import { devEnv } from "../configs/env";
+import { debug } from "../configs/env";
 import { response } from "../helpers";
 import { User } from "../models";
 import { CustomRequest } from "../types/controllers";
@@ -42,7 +42,7 @@ export const authenticate = ({ isAdmin = false, role = "user" }: auth) => async 
       res,
       {
         status: false,
-        message: "Unauthorized".concat(devEnv ? `: ${error}` : ""),
+        message: "Unauthorized".concat(debug ? `: ${error}` : ""),
       },
       401,
     );
