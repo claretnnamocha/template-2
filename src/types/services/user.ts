@@ -14,6 +14,11 @@ export interface UpdatePasswordRequest {
   newPassword: string;
 }
 
+export interface ValidateTotp {
+  userId: string;
+  token: string;
+}
+
 export interface GetAll {
   name?: string;
   email?: string;

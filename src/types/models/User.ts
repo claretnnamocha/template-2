@@ -1,6 +1,6 @@
 import { Model } from "sequelize/types";
 
-interface User {
+export interface User {
   id?: string;
   firstname?: string;
   lastname?: string;
@@ -15,8 +15,9 @@ interface User {
   active?: boolean;
   createdAt?: Date;
   loginValidFrom?: string;
-  transform?: Function;
+  totp?: any;
   validatePassword?: Function;
+  validateTotp?: Function;
   updatedAt?: Date;
   verifyToken?: string;
   resetToken?: string;

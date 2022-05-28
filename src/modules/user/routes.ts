@@ -7,6 +7,14 @@ const routes = Router();
 
 routes.get("/", controller(user.getProfile));
 
+routes.get("/totp-qrcode", controller(user.getTotpQrCode));
+
+routes.get(
+  "/validate-totp",
+  validate(validator.verifyPhone),
+  controller(user.validateTotp),
+);
+
 routes.get(
   "/verify-phone",
   validate(validator.verifyPhone),

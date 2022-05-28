@@ -340,3 +340,78 @@ export const getAllUsers = async (
     };
   }
 };
+
+/**
+ * Get user TOTP QRCode
+ * @param {userTypes.UpdateRequest} params  Request Body
+ * @returns {others.Response} Contains status, message and data if any of the operation
+ */
+export const getTotpQrCode = async (
+  params: userTypes.UpdateRequest,
+): Promise<others.Response> => {
+  try {
+    const { userId } = params;
+
+    const { totp: data }: UserSchema = await User.findOne({
+      where: { id: userId, isDeleted: false },
+    });
+
+    return {
+      status: true,
+      message: "TOTP",
+      data,
+    };
+  } catch (error) {
+    return {
+      payload: {
+        status: false,
+        message: "Error trying to get totp qr code".concat(
+          devEnv ? `: ${error}` : "",
+        ),
+      },
+      code: 500,
+    };
+  }
+};
+
+/**
+ * Validate user totp
+ * @param {userTypes.ValidateTotp} params  Request Body
+ * @returns {others.Response} Contains status, message and data if any of the operation
+ */
+export const validateTotp = async (
+  params: userTypes.ValidateTotp,
+): Promise<others.Response> => {
+  try {
+    const { userId, token } = params;
+
+    const user: UserSchema = await User.findOne({
+      where: { id: userId, isDeleted: false },
+    });
+
+    if (!user.validateTotp(token)) {
+      return {
+        payload: {
+          status: false,
+          message: "Invalid TOTP",
+        },
+        code: 401,
+      };
+    }
+
+    return {
+      status: true,
+      message: "Valid TOTP",
+    };
+  } catch (error) {
+    return {
+      payload: {
+        status: false,
+        message: "Error trying to validate totp".concat(
+          devEnv ? `: ${error}` : "",
+        ),
+      },
+      code: 500,
+    };
+  }
+};

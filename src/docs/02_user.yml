@@ -35,6 +35,42 @@ paths:
         500:
           description: Server down
 
+  /user/totp-qrcode:
+    get:
+      tags:
+        - User
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: Success
+        400:
+          description: Error
+        500:
+          description: Server down
+
+  /user/validate-totp:
+    get:
+      tags:
+        - User
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      parameters:
+        - in: query
+          name: token
+          type: string
+      responses:
+        200:
+          description: Success
+        400:
+          description: Error
+        500:
+          description: Server down
+
   /user/log-other-devices-out:
     post:
       tags:

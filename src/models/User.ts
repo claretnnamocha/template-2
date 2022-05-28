@@ -1,6 +1,9 @@
 import bcrypt from "bcryptjs";
 import { DataTypes } from "sequelize";
+import * as twofactor from "node-2fa";
 import { db } from "../configs/db";
+import { displayName } from "../../package.json";
+import { totpWindow } from "../configs/env";
 
 const User = db.define(
   "User",
@@ -28,6 +31,11 @@ const User = db.define(
       type: DataTypes.STRING,
       set(value: string) {
         const salt = bcrypt.genSaltSync();
+        const totp = twofactor.generateSecret({
+          name: displayName,
+          account: this.getDataValue("email"),
+        });
+        this.setDataValue("totp", totp);
         this.setDataValue("password", bcrypt.hashSync(value, salt));
       },
     },
@@ -51,6 +59,7 @@ const User = db.define(
       defaultValue: true,
       allowNull: false,
     },
+    totp: { type: DataTypes.JSONB },
     loginValidFrom: {
       type: DataTypes.STRING,
       defaultValue: Date.now(),
@@ -95,6 +104,15 @@ User.prototype.toJSON = function toJSON() {
 
 User.prototype.validatePassword = function validatePassword(val: string) {
   return bcrypt.compareSync(val, this.getDataValue("password"));
+};
+
+User.prototype.validateTotp = function validatePassword(val: string) {
+  const valid = twofactor.verifyToken(
+    this.getDataValue("password").secret,
+    val,
+    totpWindow,
+  );
+  return valid && valid.delta === 0;
 };
 
 export { User };
