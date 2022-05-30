@@ -1,4 +1,5 @@
 import { Op } from "sequelize";
+import * as twofactor from "node-2fa";
 import { debug } from "../../configs/env";
 import { jwt, sms } from "../../helpers";
 import { User } from "../../models";
@@ -10,6 +11,7 @@ import {
 } from "../../types/services";
 import { generateToken } from "../auth/service";
 import * as msg from "../message-templates";
+import { displayName } from "../../../package.json";
 
 /**
  * Get user profile
@@ -382,7 +384,6 @@ export const getTotpQrCode = async (
     };
   }
 };
-
 /**
  * Validate user totp
  * @param {userTypes.ValidateTotp} params  Request Body
@@ -417,6 +418,42 @@ export const validateTotp = async (
       payload: {
         status: false,
         message: "Error trying to validate totp".concat(
+          debug ? `: ${error}` : "",
+        ),
+      },
+      code: 500,
+    };
+  }
+};
+
+/**
+ * Get user TOTP QRCode
+ * @param {userTypes.UpdateRequest} params  Request Body
+ * @returns {others.Response} Contains status, message and data if any of the operation
+ */
+export const regenerateTotpSecret = async (
+  params: userTypes.UpdateRequest,
+): Promise<others.Response> => {
+  try {
+    const { userId } = params;
+
+    const user: UserSchema = await User.findByPk(userId);
+
+    const totp = twofactor.generateSecret({
+      name: displayName,
+      account: user.email,
+    });
+    await user.update({ totp });
+
+    return {
+      status: true,
+      message: "TOTP Secret regenerated",
+    };
+  } catch (error) {
+    return {
+      payload: {
+        status: false,
+        message: "Error trying to regenerate totp secret".concat(
           debug ? `: ${error}` : "",
         ),
       },

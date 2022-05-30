@@ -51,6 +51,22 @@ paths:
         500:
           description: Server down
 
+  /user/regenerate-totp-secret:
+    put:
+      tags:
+        - User
+      produces:
+        - application/json
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: Success
+        400:
+          description: Error
+        500:
+          description: Server down
+
   /user/validate-totp:
     get:
       tags:

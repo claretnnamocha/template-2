@@ -9,6 +9,8 @@ routes.get("/", controller(user.getProfile));
 
 routes.get("/totp-qrcode", controller(user.getTotpQrCode));
 
+routes.put("/regenerate-totp-secret", controller(user.regenerateTotpSecret));
+
 routes.get(
   "/validate-totp",
   validate(validator.verifyPhone),
