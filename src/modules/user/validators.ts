@@ -20,7 +20,7 @@ export const verifyPhone = {
 
 export const getAllUsers = {
   name: Joi.string(),
-  email: Joi.string().email(),
+  email: Joi.string().email().lowercase(),
   verifiedemail: Joi.boolean(),
   verifiedphone: Joi.boolean(),
   active: Joi.boolean(),
