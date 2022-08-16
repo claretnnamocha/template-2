@@ -1,7 +1,6 @@
 import { authenticator } from "otplib";
 import { Op } from "sequelize";
 import { displayName } from "../../../package.json";
-import { debug } from "../../configs/env";
 import { jwt, sms } from "../../helpers";
 import { User } from "../../models";
 import { UserSchema } from "../../types/models";
@@ -36,9 +35,8 @@ export const getProfile = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to get profile".concat(
-          debug ? `: ${error}` : "",
-        ),
+        message: "Error trying to get profile",
+        error,
       },
       code: 500,
     };
@@ -106,9 +104,8 @@ export const verifyPhone = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to verify account".concat(
-          debug ? `: ${error}` : "",
-        ),
+        message: "Error trying to verify account",
+        error,
       },
       code: 500,
     };
@@ -140,9 +137,8 @@ export const updateProfile = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to update profile".concat(
-          debug ? `: ${error}` : "",
-        ),
+        message: "Error trying to update profile",
+        error,
       },
       code: 500,
     };
@@ -189,9 +185,8 @@ export const updatePassword = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to updating password".concat(
-          debug ? `: ${error}` : "",
-        ),
+        message: "Error trying to updating password",
+        error,
       },
       code: 500,
     };
@@ -225,9 +220,8 @@ export const logOtherDevicesOut = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to log other devices out".concat(
-          debug ? `: ${error}` : "",
-        ),
+        message: "Error trying to log other devices out",
+        error,
       },
       code: 500,
     };
@@ -255,7 +249,8 @@ export const signOut = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to sign out".concat(debug ? `: ${error}` : ""),
+        message: "Error trying to sign out",
+        error,
       },
       code: 500,
     };
@@ -324,9 +319,8 @@ export const getAllUsers = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to get all users".concat(
-          debug ? `: ${error}` : "",
-        ),
+        message: "Error trying to get all users",
+        error,
       },
       code: 500,
     };
@@ -357,9 +351,8 @@ export const getTotpQrCode = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to get totp qr code".concat(
-          debug ? `: ${error}` : "",
-        ),
+        message: "Error trying to get totp qr code",
+        error,
       },
       code: 500,
     };
@@ -399,9 +392,8 @@ export const validateTotp = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to validate totp".concat(
-          debug ? `: ${error}` : "",
-        ),
+        message: "Error trying to validate totp",
+        error,
       },
       code: 500,
     };
@@ -431,9 +423,8 @@ export const regenerateTotpSecret = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to regenerate totp secret".concat(
-          debug ? `: ${error}` : "",
-        ),
+        message: "Error trying to regenerate totp secret",
+        error,
       },
       code: 500,
     };

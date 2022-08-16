@@ -1,5 +1,3 @@
-import { v4 as uuid } from "uuid";
-
 export const seed = async (models: any) => {
   /* eslint-disable-next-line */
   console.log("DB cleared");

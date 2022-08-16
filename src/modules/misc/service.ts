@@ -1,4 +1,3 @@
-import { debug } from "../../configs/env";
 import { others } from "../../types/services";
 
 /**
@@ -8,15 +7,15 @@ import { others } from "../../types/services";
  */
 export const ping = async (params: others.Ping): Promise<others.Response> => {
   try {
-    const { message } = params;
+    const { message }: any = params;
+
     return { status: true, message };
   } catch (error) {
     return {
       payload: {
         status: false,
-        message: "Error trying to ping server".concat(
-          debug ? `: ${error}` : "",
-        ),
+        message: "Error trying to ping server",
+        error,
       },
       code: 500,
     };

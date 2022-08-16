@@ -6,6 +6,7 @@ import { displayName } from "../package.json";
 import {
   bullBoard, db, env, security, swagger,
 } from "./configs";
+import { debug } from "./configs/env";
 import { response } from "./helpers";
 import routes from "./routes";
 
@@ -24,10 +25,11 @@ app.use("/bull-board", bullBoard.adapter.getRouter());
 security.lock(app);
 
 app.use("", routes);
-app.use((err: Error, _: Request, res: Response) => response(
+app.use((error: Error, _: Request, res: Response) => response(
   res,
-  { status: false, message: `Internal server error: ${err.message}` },
+  { status: false, message: "Internal server error", error },
   500,
+  debug,
 ));
 
 if (require.main) {

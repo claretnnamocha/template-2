@@ -6,6 +6,7 @@ interface ServiceResponse {
   status: boolean;
   message: string;
   data?: any;
+  error?: Error;
   metadata?: any;
 }
 

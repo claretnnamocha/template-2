@@ -42,9 +42,11 @@ export const authenticate = ({ isAdmin = false, role = "user" }: auth) => async 
       res,
       {
         status: false,
-        message: "Unauthorized".concat(debug ? `: ${error}` : ""),
+        message: "Unauthorized",
+        error,
       },
       401,
+      debug,
     );
   }
 };

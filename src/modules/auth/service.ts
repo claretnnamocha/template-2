@@ -3,7 +3,6 @@ import ejs from "ejs";
 import path from "path";
 import { Op } from "sequelize";
 import { v4 as uuid } from "uuid";
-import { debug } from "../../configs/env";
 import { jwt } from "../../helpers";
 import { sendEmail } from "../../jobs";
 import { User } from "../../models";
@@ -83,9 +82,8 @@ export const signUp = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to create account".concat(
-          debug ? `: ${error}` : "",
-        ),
+        message: "Error trying to create account",
+        error,
       },
       code: 500,
     };
@@ -174,7 +172,8 @@ export const signIn = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to login".concat(debug ? `: ${error}` : ""),
+        message: "Error trying to login",
+        error,
       },
       code: 500,
     };
@@ -260,9 +259,8 @@ export const verifyAccount = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to verify account".concat(
-          debug ? `: ${error}` : "",
-        ),
+        message: "Error trying to verify account",
+        error,
       },
       code: 500,
     };
@@ -326,9 +324,8 @@ export const initiateReset = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to initiate reset".concat(
-          debug ? `: ${error}` : "",
-        ),
+        message: "Error trying to initiate reset",
+        error,
       },
       code: 500,
     };
@@ -374,7 +371,8 @@ export const verifyReset = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to login".concat(debug ? `: ${error}` : ""),
+        message: "Error trying to login",
+        error,
       },
       code: 500,
     };
@@ -423,9 +421,8 @@ export const resetPassword = async (
     return {
       payload: {
         status: false,
-        message: "Error trying to reset password".concat(
-          debug ? `: ${error}` : "",
-        ),
+        message: "Error trying to reset password",
+        error,
       },
       code: 500,
     };
