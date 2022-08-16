@@ -1,5 +1,6 @@
-import { Op } from "sequelize";
 import * as twofactor from "node-2fa";
+import { Op } from "sequelize";
+import { displayName } from "../../../package.json";
 import { debug } from "../../configs/env";
 import { jwt, sms } from "../../helpers";
 import { User } from "../../models";
@@ -10,8 +11,6 @@ import {
   user as userTypes,
 } from "../../types/services";
 import { generateToken } from "../auth/service";
-import * as msg from "../message-templates";
-import { displayName } from "../../../package.json";
 
 /**
  * Get user profile
@@ -69,7 +68,7 @@ export const verifyPhone = async (
 
       const status = await sms.africastalking.send({
         to: user.phone,
-        body: msg.verifyPhone({ token: generatedToken, username: user.email }),
+        body: `Dear ${user.username}, Your ${displayName} verification code is ${generatedToken}`,
       });
 
       if (status) await user.update({ verifiedphone: true });

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome</title>
+  </head>
+  <body>
+    <p>
+      Dear <%= username %>,
+      <span class="<%= uuid %>"></span>
+    </p>
+    Your registration on <%= displayName %> is successful.<br />
+    <span class="<%= uuid %>"></span>
+    <p>
+      To verify to your email click here <a href="<%= link %>"><%= link %></a>
+      <span class="<%= uuid %>"></span>
+    </p>
+    <p>
+      Clicking this link will securely verify your account on <%=
+      FRONTEND_BASEURL %> using <%= email %>
+      <span class="<%= uuid %>"></span>
+    </p>
+    <span class="<%= uuid %>"></span>
+  </body>
+</html>

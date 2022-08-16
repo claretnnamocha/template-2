@@ -1,4 +1,6 @@
 import bcrypt from "bcryptjs";
+import ejs from "ejs";
+import path from "path";
 import randomstring from "randomstring";
 import { Op } from "sequelize";
 import { v4 as uuid } from "uuid";
@@ -8,7 +10,8 @@ import { sendEmail } from "../../jobs";
 import { User } from "../../models";
 import { UserSchema } from "../../types/models";
 import { auth, others } from "../../types/services";
-import * as msg from "../message-templates";
+
+const { FRONTEND_BASEURL } = process.env;
 
 export const generateToken = async ({
   userId,
@@ -75,12 +78,29 @@ export const signUp = async (
       length: 10,
     });
 
-    const { text, html } = msg.registration({ token, username: email, email });
+    const html = await ejs.renderFile(
+      path.resolve(
+        __dirname,
+        "..",
+        "..",
+        "configs",
+        "mail-templates",
+        "auth",
+        "welcome.html",
+      ),
+      {
+        link: `${FRONTEND_BASEURL}/auth/verify?token=${token}&email=${email}`,
+        username: email,
+        email,
+        uuid: uuid(),
+        FRONTEND_BASEURL,
+      },
+    );
 
     sendEmail({
       to: email,
-      subject: "Registration Complete",
-      text,
+      subject: "Welcome",
+      text: "",
       html,
     });
 
@@ -138,16 +158,30 @@ export const signIn = async (
         length: 10,
       });
 
-      const { text, html } = msg.verifyEmail({
-        token,
-        username: user.email,
-        email: user.email,
-      });
+      const html = await ejs.renderFile(
+        path.resolve(
+          __dirname,
+          "..",
+          "..",
+          "configs",
+          "mail-templates",
+          "auth",
+          "verify.html",
+        ),
+        {
+          token,
+          link: `${FRONTEND_BASEURL}/auth/verify?token=${token}&email=${user.email}`,
+          username: user.email,
+          email: user.email,
+          uuid: uuid(),
+          FRONTEND_BASEURL,
+        },
+      );
 
       sendEmail({
         to: user.email,
         subject: "Verify your email",
-        text,
+        text: "",
         html,
       });
 
@@ -214,16 +248,30 @@ export const verifyAccount = async (
         length: 10,
       });
 
-      const { text, html } = msg.verifyEmail({
-        token: generatedToken,
-        username: user.email,
-        email: user.email,
-      });
+      const html = await ejs.renderFile(
+        path.resolve(
+          __dirname,
+          "..",
+          "..",
+          "configs",
+          "mail-templates",
+          "auth",
+          "verify.html",
+        ),
+        {
+          token: generatedToken,
+          link: `${FRONTEND_BASEURL}/auth/verify?token=${token}&email=${user.email}`,
+          username: user.email,
+          email: user.email,
+          uuid: uuid(),
+          FRONTEND_BASEURL,
+        },
+      );
 
       sendEmail({
         to: user.email,
         subject: "Verify your email",
-        text,
+        text: "",
         html,
       });
 
@@ -295,15 +343,27 @@ export const initiateReset = async (
       length: 15,
     });
 
-    const { text, html } = msg.resetPassword({
-      token,
-      username: user.email,
-    });
+    const html = await ejs.renderFile(
+      path.resolve(
+        __dirname,
+        "..",
+        "..",
+        "configs",
+        "mail-templates",
+        "auth",
+        "reset.html",
+      ),
+      {
+        token,
+        link: `${FRONTEND_BASEURL}/auth/verify-reset?token=${token}`,
+        uuid: uuid(),
+      },
+    );
 
     sendEmail({
       to: user.email,
       subject: "Reset Password",
-      text,
+      text: "",
       html,
     });
 

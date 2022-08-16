@@ -21,7 +21,7 @@ export const signUp = {
 
 export const verify = {
   token: Joi.string(),
-  email: Joi.string().required(),
+  email: Joi.string().email().required(),
   resend: Joi.boolean(),
 };
 

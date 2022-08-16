@@ -1,9 +1,10 @@
 import bcrypt from "bcryptjs";
-import { DataTypes } from "sequelize";
 import * as twofactor from "node-2fa";
-import { db } from "../configs/db";
+import { DataTypes } from "sequelize";
 import { displayName } from "../../package.json";
+import { db } from "../configs/db";
 import { totpWindow } from "../configs/env";
+import { UserSchema } from "../types/models";
 
 const User = db.define(
   "User",
@@ -31,11 +32,6 @@ const User = db.define(
       type: DataTypes.STRING,
       set(value: string) {
         const salt = bcrypt.genSaltSync();
-        const totp = twofactor.generateSecret({
-          name: displayName,
-          account: this.getDataValue("email"),
-        });
-        this.setDataValue("totp", totp);
         this.setDataValue("password", bcrypt.hashSync(value, salt));
       },
     },
@@ -70,7 +66,33 @@ const User = db.define(
       allowNull: false,
     },
   },
-  { timestamps: true, tableName: "user" },
+  {
+    timestamps: true,
+    tableName: "user",
+    hooks: {
+      async afterCreate(attributes) {
+        const instance: UserSchema = attributes;
+        const totp = twofactor.generateSecret({
+          name: displayName,
+          account: instance.email,
+        });
+
+        await instance.update({ totp });
+      },
+      async afterBulkCreate(instances) {
+        for (let index = 0; index < instances.length; index += 1) {
+          const instance: UserSchema = instances[index];
+          const totp = twofactor.generateSecret({
+            name: displayName,
+            account: instance.email,
+          });
+
+          /* eslint-disable no-await-in-loop */
+          await instance.update({ totp });
+        }
+      },
+    },
+  },
 );
 
 User.prototype.toJSON = function toJSON() {
