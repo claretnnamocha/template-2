@@ -1,4 +1,4 @@
-import * as twofactor from "node-2fa";
+import { authenticator } from "otplib";
 import { Op } from "sequelize";
 import { displayName } from "../../../package.json";
 import { debug } from "../../configs/env";
@@ -10,7 +10,6 @@ import {
   others,
   user as userTypes,
 } from "../../types/services";
-import { generateToken } from "../auth/service";
 
 /**
  * Get user profile
@@ -60,11 +59,7 @@ export const verifyPhone = async (
     let user: UserSchema = await User.findByPk(userId);
 
     if (!token) {
-      const generatedToken: string = await generateToken({
-        userId,
-        length: 6,
-        charset: "numeric",
-      });
+      const generatedToken: string = user.generateTotp();
 
       const status = await sms.africastalking.send({
         to: user.phone,
@@ -93,22 +88,11 @@ export const verifyPhone = async (
         code: 498,
       };
     }
-    const { token: dbToken } = user;
-    await user.update({ token: "" });
 
-    const [theToken, tokenType, expiry] = dbToken.split("_");
-
-    if (tokenType !== "verify" || token !== theToken) {
+    if (!user.validateTotp(token)) {
       return {
         payload: { status: false, message: "Invalid token" },
         code: 498,
-      };
-    }
-
-    if (parseInt(expiry, 10) < Date.now()) {
-      return {
-        payload: { status: false, message: "Token expired" },
-        code: 410,
       };
     }
 
@@ -360,11 +344,9 @@ export const getTotpQrCode = async (
   try {
     const { userId } = params;
 
-    const {
-      totp: { qr: data },
-    }: UserSchema = await User.findOne({
-      where: { id: userId, isDeleted: false },
-    });
+    const user: UserSchema = await User.findByPk(userId);
+
+    const data = authenticator.keyuri(user.email, displayName, user.totp);
 
     return {
       status: true,
@@ -383,6 +365,7 @@ export const getTotpQrCode = async (
     };
   }
 };
+
 /**
  * Validate user totp
  * @param {userTypes.ValidateTotp} params  Request Body
@@ -438,11 +421,7 @@ export const regenerateTotpSecret = async (
 
     const user: UserSchema = await User.findByPk(userId);
 
-    const totp = twofactor.generateSecret({
-      name: displayName,
-      account: user.email,
-    });
-    await user.update({ totp });
+    await user.regenerateOtpSecret();
 
     return {
       status: true,

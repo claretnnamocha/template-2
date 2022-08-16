@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 import ejs from "ejs";
 import path from "path";
-import randomstring from "randomstring";
 import { Op } from "sequelize";
 import { v4 as uuid } from "uuid";
 import { debug } from "../../configs/env";
@@ -12,28 +11,6 @@ import { UserSchema } from "../../types/models";
 import { auth, others } from "../../types/services";
 
 const { FRONTEND_BASEURL } = process.env;
-
-export const generateToken = async ({
-  userId,
-  tokenType = "verify",
-  expiresMins = 5,
-  charset = "alphanumeric",
-  length = 5,
-}) => {
-  const expiry = Date.now() + 60 * 1000 * expiresMins;
-
-  const theToken = randomstring.generate({
-    charset,
-    length,
-    capitalization: "uppercase",
-  });
-
-  const token = [theToken, tokenType, expiry].join("_");
-
-  await User.update({ token }, { where: { id: userId } });
-
-  return theToken;
-};
 
 /**
  * Creates user account
@@ -66,17 +43,11 @@ export const signUp = async (
       }
     }
 
-    const id = uuid();
-
-    await User.create({
-      id,
+    const user: UserSchema = await User.create({
       ...params,
     });
 
-    const token: string = await generateToken({
-      userId: id,
-      length: 10,
-    });
+    const token: string = user.generateTotp();
 
     const html = await ejs.renderFile(
       path.resolve(
@@ -153,10 +124,7 @@ export const signIn = async (
     }
 
     if (!user.verifiedemail) {
-      const token: string = await generateToken({
-        userId: user.id,
-        length: 10,
-      });
+      const token: string = user.generateTotp();
 
       const html = await ejs.renderFile(
         path.resolve(
@@ -243,10 +211,7 @@ export const verifyAccount = async (
         };
       }
 
-      const generatedToken: string = await generateToken({
-        userId: user.id,
-        length: 10,
-      });
+      const generatedToken: string = user.generateTotp();
 
       const html = await ejs.renderFile(
         path.resolve(
@@ -278,21 +243,10 @@ export const verifyAccount = async (
       return { status: true, message: "Check your email" };
     }
 
-    const { token: dbToken } = user;
-    await user.update({ token: "" });
-    const [theToken, tokenType, expiry] = dbToken.split("_");
-
-    if (tokenType !== "verify" || theToken !== token) {
+    if (!user.validateTotp(token)) {
       return {
         payload: { status: false, message: "Invalid token" },
         code: 498,
-      };
-    }
-
-    if (parseInt(expiry, 10) < Date.now()) {
-      return {
-        payload: { status: false, message: "Token expired" },
-        code: 410,
       };
     }
 
@@ -337,11 +291,7 @@ export const initiateReset = async (
       };
     }
 
-    const token = await generateToken({
-      userId: user.id,
-      tokenType: "reset",
-      length: 15,
-    });
+    const token = user.generateTotp();
 
     const html = await ejs.renderFile(
       path.resolve(
@@ -407,30 +357,14 @@ export const verifyReset = async (
       };
     }
 
-    const { token: dbToken } = user;
-    await user.update({ token: "" });
-
-    const [theToken, tokenType, expiry] = dbToken.split("_");
-
-    if (tokenType !== "reset" || token !== theToken) {
+    if (!user.validateTotp(token)) {
       return {
         payload: { status: false, message: "Invalid token" },
         code: 498,
       };
     }
 
-    if (parseInt(expiry, 10) < Date.now()) {
-      return {
-        payload: { status: false, message: "Token expired" },
-        code: 410,
-      };
-    }
-
-    const data: string = await generateToken({
-      userId: user.id,
-      length: 12,
-      tokenType: "update",
-    });
+    const data: string = user.generateTotp();
 
     return {
       payload: { status: true, message: "Valid token", data },
@@ -468,22 +402,11 @@ export const resetPassword = async (
         code: 498,
       };
     }
-    const { token: dbToken } = user;
-    await user.update({ token: "" });
 
-    const [theToken, tokenType, expiry] = dbToken.split("_");
-
-    if (tokenType !== "update" || token !== theToken) {
+    if (!user.validateTotp(token)) {
       return {
         payload: { status: false, message: "Invalid token" },
         code: 498,
-      };
-    }
-
-    if (parseInt(expiry, 10) < Date.now()) {
-      return {
-        payload: { status: false, message: "Token expired" },
-        code: 410,
       };
     }
 

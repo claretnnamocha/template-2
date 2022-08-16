@@ -13,14 +13,11 @@ export interface User {
   verifiedemail?: boolean;
   verifiedphone?: boolean;
   active?: boolean;
-  token?: string;
-  totp?: {
-    secret: string;
-    uri: string;
-    qr: string;
-  };
+  totp?: string;
   loginValidFrom?: string;
   validatePassword?: Function;
+  regenerateOtpSecret?: Function;
+  generateTotp?: Function;
   validateTotp?: Function;
   createdAt?: Date;
   updatedAt?: Date;

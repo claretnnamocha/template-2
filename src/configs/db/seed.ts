@@ -5,7 +5,6 @@ export const seed = async (models: any) => {
   console.log("DB cleared");
 
   await models.User.create({
-    id: uuid(),
     email: "devclareo@gmail.com",
     firstname: "Claret",
     lastname: "Nnamocha",
