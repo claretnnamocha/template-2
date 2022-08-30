@@ -17,7 +17,7 @@ const { FRONTEND_BASEURL } = process.env;
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const signUp = async (
-  params: auth.SignUpRequest,
+  params: auth.SignUpRequest
 ): Promise<others.Response> => {
   try {
     const { email } = params;
@@ -56,15 +56,16 @@ export const signUp = async (
         "configs",
         "mail-templates",
         "auth",
-        "welcome.html",
+        "welcome.html"
       ),
       {
         link: `${FRONTEND_BASEURL}/auth/verify?token=${token}&email=${email}`,
         username: email,
+        displayName: email,
         email,
         uuid: uuid(),
         FRONTEND_BASEURL,
-      },
+      }
     );
 
     sendEmail({
@@ -96,7 +97,7 @@ export const signUp = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const signIn = async (
-  params: auth.SignInRequest,
+  params: auth.SignInRequest
 ): Promise<others.Response> => {
   try {
     const { user: identifier, password } = params;
@@ -121,7 +122,7 @@ export const signIn = async (
       };
     }
 
-    if (!user.verifiedemail) {
+    if (!user.verifiedEmail) {
       const token: string = user.generateTotp();
 
       const html = await ejs.renderFile(
@@ -132,7 +133,7 @@ export const signIn = async (
           "configs",
           "mail-templates",
           "auth",
-          "verify.html",
+          "verify.html"
         ),
         {
           token,
@@ -141,7 +142,7 @@ export const signIn = async (
           email: user.email,
           uuid: uuid(),
           FRONTEND_BASEURL,
-        },
+        }
       );
 
       sendEmail({
@@ -186,7 +187,7 @@ export const signIn = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const verifyAccount = async (
-  params: auth.VerifyRequest,
+  params: auth.VerifyRequest
 ): Promise<others.Response> => {
   try {
     const { token, email, resend } = params;
@@ -202,14 +203,14 @@ export const verifyAccount = async (
       };
     }
 
-    if (resend) {
-      if (user.verifiedemail) {
-        return {
-          payload: { status: false, message: "Profile is already verified" },
-          code: 400,
-        };
-      }
+    if (user.verifiedEmail) {
+      return {
+        payload: { status: false, message: "Profile is already verified" },
+        code: 400,
+      };
+    }
 
+    if (resend) {
       const generatedToken: string = user.generateTotp();
 
       const html = await ejs.renderFile(
@@ -220,7 +221,7 @@ export const verifyAccount = async (
           "configs",
           "mail-templates",
           "auth",
-          "verify.html",
+          "verify.html"
         ),
         {
           token: generatedToken,
@@ -229,7 +230,7 @@ export const verifyAccount = async (
           email: user.email,
           uuid: uuid(),
           FRONTEND_BASEURL,
-        },
+        }
       );
 
       sendEmail({
@@ -249,7 +250,7 @@ export const verifyAccount = async (
       };
     }
 
-    await user.update({ verifiedemail: true });
+    await user.update({ verifiedEmail: true });
 
     return {
       payload: { status: true, message: "Account verified" },
@@ -273,7 +274,7 @@ export const verifyAccount = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const initiateReset = async (
-  params: auth.InitiateResetRequest,
+  params: auth.InitiateResetRequest
 ): Promise<others.Response> => {
   try {
     const { email } = params;
@@ -281,6 +282,7 @@ export const initiateReset = async (
     const user: UserSchema = await User.findOne({
       where: { email, isDeleted: false },
     });
+
     if (!user) {
       return {
         status: true,
@@ -289,7 +291,7 @@ export const initiateReset = async (
       };
     }
 
-    const token = user.generateTotp();
+    const token = user.generateTotp(4, 5);
 
     const html = await ejs.renderFile(
       path.resolve(
@@ -299,13 +301,15 @@ export const initiateReset = async (
         "configs",
         "mail-templates",
         "auth",
-        "reset.html",
+        "reset.html"
       ),
       {
         token,
+        username: email,
+        displayName: `${user.firstName} ${user.lastName}`,
         link: `${FRONTEND_BASEURL}/auth/verify-reset?token=${token}`,
         uuid: uuid(),
-      },
+      }
     );
 
     sendEmail({
@@ -338,23 +342,16 @@ export const initiateReset = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const verifyReset = async (
-  params: auth.VerifyRequest,
+  params: auth.VerifyRequest
 ): Promise<others.Response> => {
   try {
-    const { token } = params;
+    const { token, email } = params;
 
     const user: UserSchema = await User.findOne({
-      where: { token: { [Op.like]: `${token}_reset_%` } },
+      where: { email },
     });
 
-    if (!user) {
-      return {
-        payload: { status: false, message: "Invalid token" },
-        code: 498,
-      };
-    }
-
-    if (!user.validateTotp(token)) {
+    if (!user || !user.validateTotp(token, 4, 5)) {
       return {
         payload: { status: false, message: "Invalid token" },
         code: 498,
@@ -385,13 +382,13 @@ export const verifyReset = async (
  * @returns {others.Response} Contains status, message and data if any of the operation
  */
 export const resetPassword = async (
-  params: auth.ResetPasswordRequest,
+  params: auth.ResetPasswordRequest
 ): Promise<others.Response> => {
   try {
-    const { token, password, logOtherDevicesOut } = params;
+    const { token, password, logOtherDevicesOut, email } = params;
 
     const user: UserSchema = await User.findOne({
-      where: { token: { [Op.like]: `${token}_update_%` } },
+      where: { email },
     });
 
     if (!user) {

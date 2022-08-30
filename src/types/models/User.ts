@@ -2,23 +2,27 @@ import { Model } from "sequelize/types";
 
 export interface User {
   id?: string;
-  firstname?: string;
-  lastname?: string;
+  firstName?: string;
+  lastName?: string;
   username?: string;
   email?: string;
   phone?: string;
   password?: string;
   location?: string;
   deleted?: boolean;
-  verifiedemail?: boolean;
-  verifiedphone?: boolean;
+  verifiedEmail?: boolean;
+  verifiedPhone?: boolean;
   active?: boolean;
   totp?: string;
   loginValidFrom?: string;
-  validatePassword?: Function;
-  regenerateOtpSecret?: Function;
-  generateTotp?: Function;
-  validateTotp?: Function;
+  /* eslint-disable-next-line */
+  validatePassword?: (password: string) => boolean;
+  /* eslint-disable-next-line */
+  regenerateOtpSecret?: () => void;
+  /* eslint-disable-next-line */
+  generateTotp?: (digits?: number, window?: number) => string;
+  /* eslint-disable-next-line */
+  validateTotp?: (token: string, digits?: number, window?: number) => string;
   createdAt?: Date;
   updatedAt?: Date;
 }

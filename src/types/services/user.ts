@@ -1,7 +1,7 @@
 export interface UpdateRequest {
   userId: string;
-  firstname?: string;
-  lastname?: string;
+  firstName?: string;
+  lastName?: string;
   location?: string;
   dob?: Date;
   avatar?: string;
@@ -22,9 +22,9 @@ export interface ValidateTotp {
 export interface GetAll {
   name?: string;
   email?: string;
-  verifiedemail?: boolean;
+  verifiedEmail?: boolean;
   isDeleted?: boolean;
-  verifiedphone?: boolean;
+  verifiedPhone?: boolean;
   active?: boolean;
   gender?: string;
   dob?: string;

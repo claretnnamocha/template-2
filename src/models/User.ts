@@ -5,8 +5,6 @@ import { db } from "../configs/db";
 import { totpWindow } from "../configs/env";
 import { UserSchema } from "../types/models";
 
-authenticator.options = { digits: 6, step: totpWindow * 60 };
-
 const User = db.define(
   "User",
   {
@@ -16,9 +14,8 @@ const User = db.define(
       defaultValue: UUIDV4,
     },
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
-    firstname: { type: DataTypes.STRING },
-    lastname: { type: DataTypes.STRING },
-    othernames: { type: DataTypes.STRING },
+    firstName: { type: DataTypes.STRING },
+    lastName: { type: DataTypes.STRING },
     avatar: { type: DataTypes.STRING },
     role: {
       type: DataTypes.STRING,
@@ -45,12 +42,12 @@ const User = db.define(
       defaultValue: false,
       allowNull: false,
     },
-    verifiedemail: {
+    verifiedEmail: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       allowNull: false,
     },
-    verifiedphone: {
+    verifiedPhone: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       allowNull: false,
@@ -108,11 +105,20 @@ User.prototype.validatePassword = function validatePassword(val: string) {
   return bcrypt.compareSync(val, this.getDataValue("password"));
 };
 
-User.prototype.validateTotp = function validateTotp(token: string) {
-  return authenticator.verify({ token, secret: this.getDataValue("totp") });
+User.prototype.validateTotp = function validateTotp(
+  token: string,
+  digits: number = 6,
+  window: number = totpWindow,
+) {
+  authenticator.options = { digits, step: window * 60 };
+  return authenticator.check(token, this.getDataValue("totp"));
 };
 
-User.prototype.generateTotp = function generateTotp() {
+User.prototype.generateTotp = function generateTotp(
+  digits: number = 6,
+  window: number = totpWindow,
+) {
+  authenticator.options = { digits, step: window * 60 };
   return authenticator.generate(this.getDataValue("totp"));
 };
 

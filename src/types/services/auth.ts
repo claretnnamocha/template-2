@@ -2,8 +2,8 @@ export interface SignUpRequest {
   username: string;
   email: string;
   phone: string;
-  firstname: string;
-  lastname: string;
+  firstName: string;
+  lastName: string;
   othernames: string;
   password: string;
   country: string;
@@ -30,6 +30,7 @@ export interface InitiateResetRequest {
 }
 
 export interface ResetPasswordRequest {
+  email: string;
   token: string;
   password: string;
   logOtherDevicesOut: boolean;

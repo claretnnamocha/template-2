@@ -76,8 +76,12 @@ paths:
         - application/json
       parameters:
         - in: query
+          name: email
+          required: true
+          type: string
+        - in: query
           name: token
-          reqired: true
+          required: true
           type: string
       responses:
         200:
@@ -114,9 +118,9 @@ definitions:
   signUp:
     type: object
     properties:
-      firstname:
+      firstName:
         type: string
-      lastname:
+      lastName:
         type: string
       phone:
         type: string
@@ -135,6 +139,9 @@ definitions:
   resetPassword:
     type: object
     properties:
+      email:
+        type: string
+        required: true
       token:
         type: string
         required: true

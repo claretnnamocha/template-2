@@ -64,7 +64,7 @@ export const verifyPhone = async (
         body: `Dear ${user.username}, Your ${displayName} verification code is ${generatedToken}`,
       });
 
-      if (status) await user.update({ verifiedphone: true });
+      if (status) await user.update({ verifiedPhone: true });
 
       return {
         status,
@@ -94,7 +94,7 @@ export const verifyPhone = async (
       };
     }
 
-    await user.update({ verifiedphone: true });
+    await user.update({ verifiedPhone: true });
 
     return {
       payload: { status: true, message: "Account verified" },
@@ -269,8 +269,8 @@ export const getAllUsers = async (
     const {
       name,
       email,
-      verifiedemail,
-      verifiedphone,
+      verifiedEmail,
+      verifiedPhone,
       active,
       isDeleted,
       gender,
@@ -295,8 +295,8 @@ export const getAllUsers = async (
 
     if (permissions) where = { ...where, permissions: { [Op.in]: permissions } };
 
-    if ("verifiedemail" in params) where = { ...where, verifiedemail };
-    if ("verifiedphone" in params) where = { ...where, verifiedphone };
+    if ("verifiedEmail" in params) where = { ...where, verifiedEmail };
+    if ("verifiedPhone" in params) where = { ...where, verifiedPhone };
     if ("active" in params) where = { ...where, active };
     if ("isDeleted" in params) where = { ...where, isDeleted };
 

@@ -2,8 +2,8 @@ import Joi from "joi";
 import passwordComplexity from "joi-password-complexity";
 
 export const updateProfile = {
-  firstname: Joi.string(),
-  lastname: Joi.string(),
+  firstName: Joi.string(),
+  lastName: Joi.string(),
   location: Joi.string(),
   avatar: Joi.string().uri(),
 };
@@ -21,8 +21,8 @@ export const verifyPhone = {
 export const getAllUsers = {
   name: Joi.string(),
   email: Joi.string().email().lowercase(),
-  verifiedemail: Joi.boolean(),
-  verifiedphone: Joi.boolean(),
+  verifiedEmail: Joi.boolean(),
+  verifiedPhone: Joi.boolean(),
   active: Joi.boolean(),
   isDeleted: Joi.boolean(),
   dob: Joi.date(),

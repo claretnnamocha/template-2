@@ -4,11 +4,11 @@ export const seed = async (models: any) => {
 
   await models.User.create({
     email: "devclareo@gmail.com",
-    firstname: "Claret",
-    lastname: "Nnamocha",
+    firstName: "Claret",
+    lastName: "Nnamocha",
     password: "Password123!",
     roles: "super-admin",
-    verifiedemail: true,
+    verifiedEmail: true,
   });
 
   // todo: plant other db seeds 😎

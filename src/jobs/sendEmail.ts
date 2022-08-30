@@ -1,10 +1,11 @@
+import { v4 as uuid } from "uuid";
 import { jobs, mail } from "../helpers";
 import { EmailQueue } from "./queues";
 
 export const sendEmail = async ({
   to, text, subject, html,
 }) => {
-  const queueName = "sendEmail";
+  const queueName = `sendEmail${uuid()}`;
 
   await jobs.add({
     queue: EmailQueue,

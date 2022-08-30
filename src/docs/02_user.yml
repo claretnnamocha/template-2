@@ -179,10 +179,10 @@ paths:
         - in: query
           name: username
         - in: query
-          name: verifiedemail
+          name: verifiedEmail
           type: boolean
         - in: query
-          name: verifiedphone
+          name: verifiedPhone
           type: boolean
         - in: query
           name: active
@@ -235,9 +235,9 @@ definitions:
         default: false
   editProfile:
     properties:
-      firstname:
+      firstName:
         type: string
-      lastname:
+      lastName:
         type: string
       avatar:
         type: string

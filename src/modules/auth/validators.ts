@@ -9,8 +9,8 @@ export const signIn = {
 };
 
 export const signUp = {
-  firstname: Joi.string(),
-  lastname: Joi.string(),
+  firstName: Joi.string(),
+  lastName: Joi.string(),
   phone: JoiPhone.string().phoneNumber({
     defaultCountry: "NG",
     format: "e164",
@@ -21,7 +21,7 @@ export const signUp = {
 
 export const verify = {
   token: Joi.string(),
-  email: Joi.string().email().required(),
+  email: Joi.string().email().lowercase().required(),
   resend: Joi.boolean(),
 };
 
@@ -31,9 +31,11 @@ export const initiateReset = {
 
 export const verifyReset = {
   token: Joi.string().required(),
+  email: Joi.string().email().lowercase().required(),
 };
 
 export const updateReset = {
+  email: Joi.string().email().lowercase().required(),
   token: Joi.string().required(),
   password: Joi.string(),
 };
